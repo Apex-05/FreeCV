@@ -104,7 +104,7 @@ export const UnsavedGuardProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 </p>
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 leading-relaxed">
-                  Your resume is always auto-saved locally in your browser — your content will not be lost. This only affects your version history.
+                  Your resume is always auto-saved locally in your browser - your content will not be lost. This only affects your version history.
                 </div>
               </div>
 
@@ -129,7 +129,7 @@ export const UnsavedGuardProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   onClick={handleCancel}
                   className="w-full py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  Cancel — keep editing
+                  Cancel - keep editing
                 </button>
               </div>
             </motion.div>

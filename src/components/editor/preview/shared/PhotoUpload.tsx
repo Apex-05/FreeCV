@@ -55,7 +55,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
       <div
         onClick={() => !repositioning && ref.current?.click()}
         className={`overflow-hidden flex items-center justify-center transition-all ${repositioning ? 'cursor-default' : 'cursor-pointer hover:opacity-90'}`}
-        style={{ width: size, height: size, borderRadius: radius, border: `2px dashed ${photo ? 'transparent' : borderColor}`, background: photo ? 'transparent' : '#f9fafb' }}
+        style={{ width: size, height: size, borderRadius: radius, border: `1px solid ${photo ? 'transparent' : borderColor}`, background: photo ? 'transparent' : '#f9fafb' }}
       >
         {photo
           ? <img src={photo} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: photoPosition, borderRadius: radius }} />

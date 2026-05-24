@@ -130,6 +130,7 @@ interface ResumeStore {
 
   addSkillCategory: () => void;
   updateSkillCategory: (id: string, field: keyof SkillCategory, value: string) => void;
+  updateSkillLevel: (id: string, level: number) => void;
   removeSkillCategory: (id: string) => void;
 
   addCertification: () => void;
@@ -230,6 +231,7 @@ export const useResumeStore = create<ResumeStore>((set) => ({
   // Skills
   addSkillCategory: () => set(s => upd(s, { ...s.resume, skills: [...s.resume.skills, { id: nanoid(), category: 'Category', skills: 'Skill 1, Skill 2, Skill 3' }] })),
   updateSkillCategory: (id, field, value) => set(s => upd(s, { ...s.resume, skills: s.resume.skills.map(sk => sk.id === id ? { ...sk, [field]: value } : sk) })),
+  updateSkillLevel: (id, level) => set(s => upd(s, { ...s.resume, skills: s.resume.skills.map(sk => sk.id === id ? { ...sk, level } : sk) })),
   removeSkillCategory: (id) => set(s => upd(s, { ...s.resume, skills: s.resume.skills.filter(sk => sk.id !== id) })),
 
   // Certifications

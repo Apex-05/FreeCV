@@ -1,23 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { BookOpen, Settings, Layers, Link, History } from 'lucide-react';
+import { BookOpen, Settings, Layers, Link, History, LayoutTemplate } from 'lucide-react';
 import { GuidePanel } from './sidebar/GuidePanel';
 import { SettingsPanel } from './sidebar/SettingsPanel';
 import { SectionsPanel } from './sidebar/SectionsPanel';
 import { ContactPanel } from './sidebar/ContactPanel';
 import { RecoveryPanel } from './sidebar/RecoveryPanel';
+import { TemplatePanel } from './sidebar/TemplatePanel';
 
 const TABS = [
-  { id: 'guide',    label: 'Guide',    icon: BookOpen  },
-  { id: 'contact',  label: 'Contact',  icon: Link      },
-  { id: 'settings', label: 'Style',    icon: Settings  },
-  { id: 'sections', label: 'Sections', icon: Layers    },
-  { id: 'history',  label: 'History',  icon: History   },
+  { id: 'guide',    label: 'Guide',    icon: BookOpen       },
+  { id: 'contact',  label: 'Contact',  icon: Link           },
+  { id: 'settings', label: 'Style',    icon: Settings       },
+  { id: 'sections', label: 'Sections', icon: Layers         },
+  { id: 'template', label: 'Template', icon: LayoutTemplate },
+  { id: 'history',  label: 'History',  icon: History        },
 ];
 
 const MIN_WIDTH = 220;
 const MAX_WIDTH = 480;
-const DEFAULT_WIDTH = 320;
+const DEFAULT_WIDTH = 480;
 
 export const Sidebar: React.FC = () => {
   const [activeTab, setActiveTab] = useState('guide');
@@ -84,6 +86,7 @@ export const Sidebar: React.FC = () => {
             {activeTab === 'contact'  && <ContactPanel  key="contact"  />}
             {activeTab === 'settings' && <SettingsPanel key="settings" />}
             {activeTab === 'sections' && <SectionsPanel key="sections" />}
+            {activeTab === 'template' && <TemplatePanel key="template" />}
             {activeTab === 'history'  && <RecoveryPanel key="history"  />}
           </AnimatePresence>
         </div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Twenty Seconds CV — Consulting · Dark sidebar (30%) with photo + skills · Clean right panel.
  */
 import React from 'react';
@@ -12,7 +12,7 @@ import { CustomSectionBlock } from '../shared/CustomSectionBlock';
 interface Props { data: ResumeData; isPrinting: boolean }
 
 export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => {
-  const store = useResumeStore();
+  const store = useResumeStore.getState();
   const { settings, personalInfo, sections } = data;
   const visible = (id: string) => sections.some(s => s.id === id && s.visible !== false);
   const acc = settings.accentColor;
@@ -49,11 +49,15 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
   const dateStr = (s: string, e: string) => [s, e].filter(Boolean).join(' – ');
   const visibleLinks = personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
 
-  // skill dot renderer (5 dots)
-  const SkillBar = ({ level }: { level: number }) => (
+  // skill dot renderer — click dot to set level, click filled dot again to decrement
+  const SkillBar = ({ skillId, level }: { skillId: string; level: number }) => (
     <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i < level ? acc : 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+        <div
+          key={i}
+          onClick={isPrinting ? undefined : () => store.updateSkillLevel(skillId, i + 1 === level ? Math.max(1, level - 1) : i + 1)}
+          style={{ width: 8, height: 8, borderRadius: '50%', background: i < level ? acc : 'rgba(255,255,255,0.25)', flexShrink: 0, cursor: isPrinting ? 'default' : 'pointer' }}
+        />
       ))}
     </div>
   );
@@ -93,7 +97,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
                   <EditableField value={sk.category || sk.skills} onChange={v => store.updateSkillCategory(sk.id, sk.category ? 'category' : 'skills', v)} style={{ fontSize: fs - 1 + 'px', color: sidebarText, fontWeight: 600 }} />
                   <Del onClick={() => store.removeSkillCategory(sk.id)} />
                 </div>
-                <SkillBar level={Math.min(5, Math.max(1, 5 - (i % 3)))} />
+                <SkillBar skillId={sk.id} level={sk.level ?? Math.min(5, Math.max(1, 5 - (i % 3)))} />
               </div>
             ))}
             <Add onClick={() => store.addSkillCategory()} label="+ Add skill" />
@@ -122,97 +126,93 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
       {/* ── Right Content ── */}
       <div style={{ flex: 1, padding: `${settings.topMargin * 4 + 16}px 28px 40px 24px` }}>
 
-        {/* Summary */}
-        {visible('summary') && (
-          <div style={{ marginBottom: 16 }}>
-            <RSH id="summary" label="Profile" />
-            <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#4a5568', display: 'block', lineHeight: '1.65' }} />
-          </div>
-        )}
-
-        {/* Experience */}
-        {visible('experience') && (
-          <div style={{ marginBottom: 16 }}>
-            <RSH id="experience" label="Experience" />
-            {data.experience.map(exp => (
-              <div key={exp.id} className="group" style={{ marginBottom: 12, paddingLeft: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 700, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
-                      <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', color: acc }} />
-                      <span style={{ color: '#a0aec0', fontSize: fs - 1 + 'px' }}>·</span>
-                      <EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096' }} />
+        {/* Right sections — ordered by data.sections, excluding sidebar-fixed items */}
+        {sections.filter(s => !['education', 'skills'].includes(s.id)).map(sec => {
+          if (sec.visible === false) return null;
+          switch (sec.id) {
+            case 'summary': return (
+              <div key="summary" style={{ marginBottom: 16 }}>
+                <RSH id="summary" label="Profile" />
+                <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#4a5568', display: 'block', lineHeight: '1.65' }} />
+              </div>
+            );
+            case 'experience': return (
+              <div key="experience" style={{ marginBottom: 16 }}>
+                <RSH id="experience" label="Experience" />
+                {data.experience.map(exp => (
+                  <div key={exp.id} className="group" style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 700, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
+                          <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', color: acc }} />
+                          <span style={{ color: '#a0aec0', fontSize: fs - 1 + 'px' }}>·</span>
+                          <EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096' }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} style={{ fontSize: fs - 1 + 'px', color: '#718096', flexShrink: 0, fontStyle: 'italic' }} />
+                        <Del onClick={() => store.removeExperience(exp.id)} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 5 }}>
+                      {exp.bullets.map((b, bi) => (<EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />))}
+                      <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} style={{ fontSize: fs - 1 + 'px', color: '#718096', flexShrink: 0, fontStyle: 'italic' }} />
-                    <Del onClick={() => store.removeExperience(exp.id)} />
+                ))}
+                <Add onClick={() => store.addExperience()} label="+ Add experience" />
+              </div>
+            );
+            case 'projects': return (
+              <div key="projects" style={{ marginBottom: 16 }}>
+                <RSH id="projects" label="Projects" />
+                {data.projects.map(proj => (
+                  <div key={proj.id} className="group" style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span>
+                        <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700, color: '#1a202c' }} />
+                        {proj.technologies && <><span style={{ color: '#a0aec0' }}> · </span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#718096' }} /></>}
+                      </span>
+                      <Del onClick={() => store.removeProject(proj.id)} />
+                    </div>
+                    <div style={{ marginTop: 4 }}>
+                      {proj.bullets.map((b, bi) => (<EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />))}
+                      <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
+                    </div>
                   </div>
-                </div>
-                <div style={{ marginTop: 5 }}>
-                  {exp.bullets.map((b, bi) => (
-                    <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />
-                  ))}
-                  <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
-                </div>
+                ))}
+                <Add onClick={() => store.addProject()} label="+ Add project" />
               </div>
-            ))}
-            <Add onClick={() => store.addExperience()} label="+ Add experience" />
-          </div>
-        )}
-
-        {/* Projects */}
-        {visible('projects') && (
-          <div style={{ marginBottom: 16 }}>
-            <RSH id="projects" label="Projects" />
-            {data.projects.map(proj => (
-              <div key={proj.id} className="group" style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span>
-                    <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700, color: '#1a202c' }} />
-                    {proj.technologies && <><span style={{ color: '#a0aec0' }}> · </span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#718096' }} /></>}
-                  </span>
-                  <Del onClick={() => store.removeProject(proj.id)} />
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  {proj.bullets.map((b, bi) => (
-                    <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />
-                  ))}
-                  <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
-                </div>
+            );
+            case 'certifications': return data.certifications.length > 0 ? (
+              <div key="certifications" style={{ marginBottom: 16 }}>
+                <RSH id="certifications" label="Certifications" />
+                {data.certifications.map(c => (
+                  <div key={c.id} className="group" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <div>
+                      <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600 }} />
+                      {c.issuer && <><span style={{ color: '#a0aec0' }}> · </span><EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} /></>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#a0aec0', flexShrink: 0 }} />}
+                      <Del onClick={() => store.removeCertification(c.id)} />
+                    </div>
+                  </div>
+                ))}
+                <Add onClick={() => store.addCertification()} label="+ Add certification" />
               </div>
-            ))}
-            <Add onClick={() => store.addProject()} label="+ Add project" />
-          </div>
-        )}
-
-        {/* Certifications */}
-        {visible('certifications') && data.certifications.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <RSH id="certifications" label="Certifications" />
-            {data.certifications.map(c => (
-              <div key={c.id} className="group" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                <div>
-                  <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600 }} />
-                  {c.issuer && <><span style={{ color: '#a0aec0' }}> · </span><EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} /></>}
+            ) : null;
+            default: {
+              const cs = data.customSections.find(c => c.id === sec.id);
+              return cs ? (
+                <div key={cs.id} style={{ marginBottom: 16 }}>
+                  <CustomSectionBlock section={cs} accentColor={acc} fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<RSH label={cs.title} />} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#a0aec0', flexShrink: 0 }} />}
-                  <Del onClick={() => store.removeCertification(c.id)} />
-                </div>
-              </div>
-            ))}
-            <Add onClick={() => store.addCertification()} label="+ Add certification" />
-          </div>
-        )}
-
-        {/* Custom sections */}
-        {data.customSections.filter(cs => visible(cs.id)).map(cs => (
-          <div key={cs.id} style={{ marginBottom: 16 }}>
-            <CustomSectionBlock section={cs} accentColor={acc} fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<RSH label={cs.title} />} />
-          </div>
-        ))}
+              ) : null;
+            }
+          }
+        })}
       </div>
     </div>
   );

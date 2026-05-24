@@ -5,6 +5,7 @@ import { Download, Zap, Shield, Sparkles, FileText, ArrowRight, ChevronDown, Upl
 import { templateConfigs } from '../data/templateConfigs';
 import type { TemplateConfig, TemplateId } from '../types/resume';
 import { useResumeStore } from '../store/resumeStore';
+import { usePDFEditorStore } from '../store/pdfEditorStore';
 import { parseDocx, parseText } from '../utils/resumeParser';
 import toast from 'react-hot-toast';
 
@@ -344,15 +345,109 @@ const TEMPLATE_PREVIEWS: Record<string, React.FC<{ accent: string }>> = {
   ),
 };
 
+// ─── Animated resume demo (hero right column) ─────────────────────────────────
+const RSecHead: React.FC<{ label: string }> = ({ label }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+    <div style={{ width: 3, height: 9, background: 'linear-gradient(180deg,#6366f1,#8b5cf6)', borderRadius: 2 }} />
+    <span style={{ fontSize: 6.5, fontWeight: 800, color: '#6366f1', textTransform: 'uppercase' as const, letterSpacing: '0.12em' }}>{label}</span>
+    <div style={{ flex: 1, height: 0.5, background: '#e8eaf0' }} />
+  </div>
+);
+
+const ResumeAnimation: React.FC = () => (
+  <div className="relative select-none" style={{ width: 360, height: 500 }}>
+    {/* Ambient glow */}
+    <div style={{ position: 'absolute', top: '10%', left: '5%', right: '5%', bottom: '10%', background: 'radial-gradient(ellipse, rgba(99,102,241,0.26) 0%, transparent 68%)', filter: 'blur(22px)', pointerEvents: 'none' }} />
+
+    {/* Main resume card — centered */}
+    <motion.div
+      animate={{ y: [0, -11, 0] }}
+      transition={{ repeat: Infinity, duration: 5.5, ease: 'easeInOut' }}
+      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translateX(-50%) translateY(-50%)', width: 290, background: '#fff', borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 64px rgba(99,102,241,0.3), 0 6px 28px rgba(0,0,0,0.42)' }}
+    >
+      {/* Header */}
+      <div style={{ background: 'linear-gradient(135deg,#1a1d2e 0%,#232840 100%)', padding: '16px 18px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 800 }}>A</div>
+          <div>
+            <div style={{ color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '-0.01em' }}>Alex Johnson</div>
+            <div style={{ color: '#818cf8', fontSize: 9, marginTop: 2 }}>Software Engineer</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '11px 16px 14px' }}>
+        {/* Experience */}
+        <RSecHead label="Experience" />
+        <div style={{ borderLeft: '2px solid rgba(99,102,241,0.18)', paddingLeft: 8, marginBottom: 11 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span style={{ fontSize: 8.5, fontWeight: 700, color: '#1a202c' }}>Senior Engineer</span>
+            <span style={{ fontSize: 6.5, color: '#94a3b8' }}>2022 - Now</span>
+          </div>
+          <div style={{ fontSize: 7.5, color: '#6366f1', marginTop: 1, fontWeight: 500 }}>Tech Corp · San Francisco</div>
+          <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column' as const, gap: 3 }}>
+            <div style={{ height: 2.5, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+              <motion.div animate={{ width: ['0%', '84%'] }} transition={{ repeat: Infinity, duration: 1.3, delay: 1.2, repeatDelay: 4.7 }}
+                style={{ height: '100%', background: 'linear-gradient(90deg,#6366f1,#818cf8)', borderRadius: 2 }} />
+            </div>
+            <div style={{ height: 2.5, background: '#f1f5f9', borderRadius: 2, width: '62%' }} />
+          </div>
+        </div>
+
+        {/* Skills */}
+        <RSecHead label="Skills" />
+        <div style={{ marginBottom: 11 }}>
+          {[['React 19', 95, '#6366f1,#818cf8'], ['TypeScript', 90, '#8b5cf6,#a78bfa'], ['Tailwind CSS', 88, '#06b6d4,#6366f1'], ['Framer Motion', 80, '#f59e0b,#f97316']].map(([skill, pct, grad], i) => (
+            <div key={String(skill)} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
+              <span style={{ fontSize: 7, color: '#475569', width: 58, flexShrink: 0, fontWeight: 500 }}>{String(skill)}</span>
+              <div style={{ flex: 1, height: 4, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
+                <motion.div initial={{ width: 0 }} animate={{ width: `${Number(pct)}%` }}
+                  transition={{ delay: 0.3 + i * 0.18, duration: 1, ease: 'easeOut', repeat: Infinity, repeatDelay: 4 }}
+                  style={{ height: '100%', background: `linear-gradient(90deg,${String(grad)})`, borderRadius: 3 }} />
+              </div>
+              <span style={{ fontSize: 6.5, color: '#94a3b8', width: 24, textAlign: 'right' as const }}>{Number(pct)}%</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Education */}
+        <RSecHead label="Education" />
+        <div style={{ fontSize: 8.5, fontWeight: 700, color: '#1a202c' }}>UC Berkeley</div>
+        <div style={{ fontSize: 7, color: '#718096', fontStyle: 'italic', marginTop: 1 }}>B.S. Computer Science · 2020</div>
+      </div>
+    </motion.div>
+
+    {/* Badge: Auto-saved — top right */}
+    <motion.div animate={{ opacity: [0, 1, 1, 0], y: [8, 0, 0, -8] }} transition={{ repeat: Infinity, duration: 5, delay: 1.8 }}
+      style={{ position: 'absolute', top: 10, right: 10, background: '#22c55e', color: '#fff', borderRadius: 20, padding: '5px 12px', fontSize: 10, fontWeight: 700, boxShadow: '0 4px 18px rgba(34,197,94,0.55)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' as const }}>
+      <Check size={9} /> Auto-saved
+    </motion.div>
+
+    {/* Badge: Editing — left */}
+    <motion.div animate={{ opacity: [0, 1, 1, 0], x: [10, 0, 0, 10] }} transition={{ repeat: Infinity, duration: 5, delay: 0.6 }}
+      style={{ position: 'absolute', top: '38%', left: 10, background: '#fff', borderRadius: 11, padding: '6px 12px', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', fontSize: 10, fontWeight: 600, color: '#6366f1', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' as const }}>
+      <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ repeat: Infinity, duration: 0.85 }} style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1' }} />
+      Editing
+    </motion.div>
+
+    {/* Badge: PDF Ready — bottom right */}
+    <motion.div animate={{ opacity: [0, 1, 1, 0], x: [-10, 0, 0, -10] }} transition={{ repeat: Infinity, duration: 5, delay: 3.2 }}
+      style={{ position: 'absolute', bottom: 10, right: 10, background: 'linear-gradient(135deg,#ef4444,#f97316)', color: '#fff', borderRadius: 11, padding: '6px 12px', fontSize: 10, fontWeight: 700, boxShadow: '0 6px 22px rgba(239,68,68,0.42)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' as const }}>
+      <Download size={10} /> PDF Ready
+    </motion.div>
+  </div>
+);
+
 function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: () => void }) {
   const [hovered, setHovered] = useState(false);
   const Preview = TEMPLATE_PREVIEWS[config.id];
 
   return (
     <motion.div whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="template-card group" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      {/* Preview */}
-      <div className="h-52 bg-white overflow-hidden relative border-b border-gray-100">
+      className="template-card group h-full flex flex-col" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10)' }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      {/* Preview — fixed height */}
+      <div className="h-52 bg-white overflow-hidden relative border-b border-gray-100 flex-shrink-0">
         <div className="absolute inset-0 overflow-hidden">
           {Preview
             ? <Preview accent={config.accentColor} />
@@ -375,13 +470,13 @@ function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: 
           </button>
         </motion.div>
       </div>
-      {/* Info */}
-      <div className="p-4">
+      {/* Info — grows to fill remaining height so all cards align at the bottom */}
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-1">
           <h3 className="font-semibold text-gray-900 text-sm">{config.name}</h3>
           <div className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5" style={{ background: config.accentColor }} />
         </div>
-        <p className="text-xs text-gray-500 mb-2 leading-snug">{config.description}</p>
+        <p className="text-xs text-gray-500 mb-3 leading-snug line-clamp-2 flex-1">{config.description}</p>
         <div className="flex flex-wrap gap-1">
           {config.tags.map(tag => (
             <span key={tag} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{tag}</span>
@@ -393,17 +488,18 @@ function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: 
 }
 
 const FEATURES = [
-  { icon: Zap, color: '#f59e0b', title: 'Instant editing', desc: 'Click any text on your resume to edit it directly. Changes appear in real-time.' },
-  { icon: Download, color: '#6366f1', title: 'Perfect PDF export', desc: 'Download a pixel-perfect PDF that looks exactly like your preview.' },
-  { icon: Shield, color: '#22c55e', title: 'No account needed', desc: 'Your resume stays in your browser. No signup, no data stored on our servers.' },
-  { icon: Sparkles, color: '#8b5cf6', title: '10 pro templates', desc: 'Carefully crafted templates for every industry and career level.' },
-  { icon: Upload, color: '#14b8a6', title: 'Import existing resume', desc: 'Upload a .docx or text file and we\'ll parse it into the editor automatically.' },
-  { icon: Users, color: '#f43f5e', title: 'ATS-friendly formats', desc: 'Jake\'s Resume and ModernCV are optimised to pass ATS screening systems.' },
+  { icon: Zap,      color: '#f59e0b', title: 'Instant editing',        desc: 'Click any text on your resume to edit it directly. Changes appear in real-time.' },
+  { icon: Shield,   color: '#22c55e', title: 'No account needed',      desc: 'Your resume stays in your browser. No signup, no data stored on our servers.' },
+  { icon: Sparkles, color: '#8b5cf6', title: '10 pro templates',       desc: 'Carefully crafted templates for every industry and career level.' },
+  { icon: Users,    color: '#f43f5e', title: 'ATS-friendly formats',   desc: "Jake's Resume and ModernCV are optimised to pass ATS screening systems." },
+  { icon: Upload,   color: '#6366f1', title: 'Perfect PDF export',     desc: 'Download a pixel-perfect PDF that looks exactly like your preview.' },
+  { icon: Download, color: '#14b8a6', title: 'Import existing resume', desc: 'Upload a PDF, .docx, or .txt file and we\'ll parse it into the editor automatically.' },
 ];
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { setTemplate, loadFromData } = useResumeStore();
+  const { setPdfFile } = usePDFEditorStore();
   const [filter, setFilter] = useState<string>('all');
   const featuresRef = useRef<HTMLDivElement>(null);
   const templatesRef = useRef<HTMLDivElement>(null);
@@ -419,6 +515,15 @@ export const HomePage: React.FC = () => {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (importRef.current) importRef.current.value = '';
+
+    // PDFs → PDF Direct Editor
+    if (file.name.toLowerCase().endsWith('.pdf')) {
+      setPdfFile(file);
+      navigate('/pdf-editor');
+      return;
+    }
+
     const toastId = toast.loading('Parsing your resume...');
     try {
       let result;
@@ -430,7 +535,6 @@ export const HomePage: React.FC = () => {
     } catch {
       toast.error('Import failed. Try a .docx or plain text file.', { id: toastId });
     }
-    if (importRef.current) importRef.current.value = '';
   };
 
   const categories = ['all', 'professional', 'creative', 'academic'];
@@ -439,7 +543,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center">
             <FileText size={16} className="text-white" />
@@ -456,64 +560,83 @@ export const HomePage: React.FC = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-28 pb-16 px-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1040 50%, #0a0a1a 100%)' }}>
+      <section className="min-h-screen flex items-center pt-20 pb-16 px-6 lg:px-16 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1040 50%, #0a0a1a 100%)' }}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: '#6366f1' }} />
-          <div className="absolute bottom-10 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl" style={{ background: '#8b5cf6' }} />
+          <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full opacity-20 blur-3xl" style={{ background: '#6366f1' }} />
+          <div className="absolute bottom-10 right-1/3 w-72 h-72 rounded-full opacity-15 blur-3xl" style={{ background: '#8b5cf6' }} />
+          <div className="absolute top-1/3 right-1/4 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: '#06b6d4' }} />
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-sm text-indigo-300 mb-6">
-            <Sparkles size={14} className="text-indigo-400" />
-            No signup · Free forever · Your data stays local
-          </motion.div>
+        <div className="max-w-6xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-4xl sm:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
-            Build your dream resume
-            <br />
-            <span className="gradient-text">in minutes, not hours</span>
-          </motion.h1>
+          {/* LEFT — content */}
+          <div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-sm text-indigo-300 mb-8">
+              <Sparkles size={14} className="text-indigo-400" />
+              No signup · Free forever · Your data stays local
+            </motion.div>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
-            Professional resume templates. Live editing. Perfect PDF export. Completely free with no account required.
-          </motion.p>
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="text-5xl sm:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
+              <span className="block mb-3">Build your dream</span>
+              <span className="gradient-text block">in minutes, not hours</span>
+            </motion.h1>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-            <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5">
-              Choose a Template <ArrowRight size={16} />
-            </button>
-            <div>
-              <input ref={importRef} type="file" accept=".docx,.txt" onChange={handleImport} style={{ display: 'none' }} />
-              <button onClick={() => importRef.current?.click()}
-                className="flex items-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base">
-                <Upload size={16} /> Import My Resume
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+              className="grid grid-cols-2 gap-3 mb-8" style={{ maxWidth: 460 }}>
+              {[
+                { icon: FileText, label: 'Pro resume templates' },
+                { icon: Zap,      label: 'Live editing'         },
+                { icon: Upload,   label: 'Perfect PDF export'   },
+                { icon: Shield,   label: 'Completely Free'      },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm text-gray-200 text-sm font-medium justify-center">
+                  <Icon size={15} className="text-indigo-400 flex-shrink-0" />
+                  {label}
+                </div>
+              ))}
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+              className="flex items-center gap-4 mb-10 flex-wrap">
+              <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5">
+                Choose a Template <ArrowRight size={16} />
               </button>
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-            className="flex items-center justify-center gap-8 text-sm text-gray-500">
-            {[['10', 'Templates'], ['∞', 'Downloads'], ['0', 'Cost'], ['100%', 'Private']].map(([num, label]) => (
-              <div key={label} className="text-center">
-                <div className="text-xl font-bold text-white">{num}</div>
-                <div className="text-xs">{label}</div>
+              <div>
+                <input ref={importRef} type="file" accept=".docx,.txt,.pdf" onChange={handleImport} style={{ display: 'none' }} />
+                <button onClick={() => importRef.current?.click()}
+                  className="flex items-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base">
+                  <Upload size={16} /> Import My Resume
+                </button>
               </div>
-            ))}
-          </motion.div>
+            </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
-            className="mt-12 flex justify-center">
-            <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-gray-500 hover:text-gray-300 transition-colors animate-bounce">
-              <ChevronDown size={24} />
-            </button>
-          </motion.div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+              className="flex items-center gap-8 text-sm text-gray-500">
+              {[['10', 'Templates'], ['∞', 'Downloads'], ['0', 'Cost'], ['100%', 'Private']].map(([num, label]) => (
+                <div key={label} className="text-center">
+                  <div className="text-xl font-bold text-white">{num}</div>
+                  <div className="text-xs">{label}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* RIGHT — animated resume */}
+          <div className="hidden lg:flex items-center justify-center">
+            <ResumeAnimation />
+          </div>
         </div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-gray-500 hover:text-gray-300 transition-colors animate-bounce">
+            <ChevronDown size={24} />
+          </button>
+        </motion.div>
       </section>
 
       {/* Template Gallery */}
@@ -534,9 +657,9 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {filtered.map((config, i) => (
-              <motion.div key={config.id} initial={{ opacity: 0, y: 20 }} animate={templatesInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.07 }}>
+              <motion.div key={config.id} className="h-full" initial={{ opacity: 0, y: 20 }} animate={templatesInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.07 }}>
                 <TemplateCard config={config} onSelect={() => handleSelectTemplate(config.id as TemplateId)} />
               </motion.div>
             ))}
@@ -559,10 +682,11 @@ export const HomePage: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Everything you need. Nothing you don't.</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Built for job seekers who want results, not subscriptions.</p>
           </motion.div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={featuresInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.07 }}
-                className="p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all bg-white group">
+                className="p-5 rounded-2xl shadow-md hover:shadow-xl transition-all bg-white group">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110" style={{ background: f.color + '15' }}>
                   <f.icon size={20} style={{ color: f.color }} />
                 </div>
@@ -583,7 +707,7 @@ export const HomePage: React.FC = () => {
               <span className="text-indigo-200 text-sm font-medium">Join thousands of job seekers</span>
             </div>
             <h2 className="text-3xl font-bold text-white mb-3">Ready to land your dream job?</h2>
-            <p className="text-indigo-200 mb-6 text-lg">Create your resume in minutes. No BS. Completely free.</p>
+            <p className="text-indigo-200 mb-6 text-lg">Create your resume in minutes. Completely free.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })}
                 className="flex items-center gap-2 bg-white text-indigo-700 font-bold px-8 py-3.5 rounded-2xl text-base hover:bg-gray-50 transition-all shadow-lg hover:-translate-y-0.5">
@@ -612,6 +736,7 @@ export const HomePage: React.FC = () => {
             <span className="font-bold text-gray-900">FreeCV</span>
           </div>
           <p className="text-sm text-gray-400">Free forever · No account needed · Your data stays in your browser</p>
+          <p className="text-sm text-gray-400">&copy; 2026 Adarsh Ranjan</p>
         </div>
       </footer>
     </div>

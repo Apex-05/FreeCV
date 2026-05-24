@@ -1,183 +1,144 @@
-# FreeCV — Free Browser-Based Resume Editor
+# FreeCV
 
-A fully offline, no-login resume builder. Click any text to edit, pick a template, download a pixel-perfect PDF. All data stays in your browser.
+Free, browser-based resume builder. No account. No server. Everything stays local.
 
-**Dev server:** `npm run dev` → http://localhost:5173  
-**Build:** `npm run build`
-
----
-
-## What You Can Do
-
-### Editing the Resume (Canvas)
-- **Click any text** on the resume to edit it inline (name, title, company, dates, bullet points, etc.)
-- **Rich text formatting** — select text while editing to get a Bold / Italic / Underline toolbar
-- **Bullets** — hover any bullet point to reveal a remove button; click `+ Add point` to add a new one
-- **Press Enter** in a bullet to jump to the next bullet; **Backspace** on an empty bullet removes it
-- **Press Escape** in any field to cancel and revert changes
-- **Link icons** next to job titles, education, and projects — click to open the URL, right-click to edit
-
-### Templates (Style Tab)
-6 professionally designed templates, switchable at any time:
-| Template | Best For |
-|---|---|
-| Modern Professional | Tech, business, general |
-| Classic ATS | Finance, law, ATS-optimized |
-| Minimal Clean | Design, consulting |
-| Executive | Senior roles, leadership |
-| Creative Sidebar | Designers, marketers |
-| Academic | PhDs, research, academia |
-
-### Styling (Style Tab)
-- **18 fonts** — 11 sans-serif (Inter, Roboto, Lato, Open Sans, Source Sans 3, Nunito, DM Sans, Outfit, Plus Jakarta Sans, Raleway, Josefin Sans) + 7 serif (Georgia, Merriweather, Playfair Display, EB Garamond, Lora, Libre Baskerville, Crimson Text)
-- **Font size** slider (9–14 px)
-- **Line height** slider (1.0–2.0)
-- **Top margin** and **Section spacing** sliders
-- **Side padding** slider (adds horizontal breathing room)
-- **12 accent colors** + custom color picker
-- **Bullet style** — choose from •  ▸  –  ▪  ◦  or none
-- **Photo shape** — circle, square, or rounded corners
-
-### Profile Photo (Contact Tab)
-- Upload a photo (any image format)
-- **Crop, zoom, and rotate** with the full photo editor (click "Edit" in the Contact tab)
-- **Reposition** — hover the photo on the canvas and click the Move icon to choose from 9 anchor positions (top-left, center, bottom-right, etc.)
-- **Toggle visibility** — show or hide the photo without deleting it
-- Change or remove at any time
-
-### Contact & Social Links (Contact Tab)
-Supported link types: Email · Phone · Location · LinkedIn · GitHub · Twitter/X · Instagram · Website · Portfolio · YouTube · ORCID · Custom
-
-For each link:
-- **Click the value** to edit it inline
-- **Toggle visibility** — show/hide on the resume without removing it
-- **Drag to reorder** the order links appear on the resume
-- **Delete** individual links
-- Add as many links as you want (including multiple custom links)
-
-### Sections (Sections Tab)
-- **Drag to reorder** any section (Summary, Education, Experience, Projects, Skills, Certifications, custom)
-- **Apply Order** button — reorder is staged until you confirm; a Reset button discards pending changes
-- **Toggle visibility** (eye icon) — hide/show a section without losing its content
-- **Delete any section** — hover and click the trash icon; data is preserved
-- **Restore deleted sections** — a restore panel appears at the bottom listing removed standard sections with one-click restore
-- **Add custom sections** — type a name or pick from quick options (Co-curricular Activities, Volunteer Work, Publications, Awards, Languages, Hobbies, References, Conferences…)
-
-### Undo / Redo
-- **Ctrl+Z** — undo the last change (up to 50 steps)
-- **Ctrl+Y** or **Ctrl+Shift+Z** — redo
-- Undo/Redo buttons also visible in the top bar
-- While typing inside a field, native browser undo works; store-level undo kicks in when you're not inside a field
-
-### Import Resume (Top Bar → Import)
-Import an existing resume and have it auto-populate all fields:
-- **.pdf** — extracts text using PDF.js, reconstructs sections
-- **.docx** — extracts text via Mammoth.js, preserves structure
-- **.txt** — parses plain text with smart section detection
-
-After parsing:
-- A confirmation modal shows; choose to keep or skip any embedded photo
-- All recognized sections are mapped to the correct resume fields
-- Unknown section headers become custom sections automatically
-
-### Export / Save
-- **Download PDF** (top-right button) — pixel-perfect PDF at US Letter size
-- **Save PDF** (folder icon button) — on Chrome/Edge uses the File System Access API to let you pick exactly where to save; falls back to a regular download on other browsers
-
-### Auto-Save
-- Every change is **automatically saved** to `localStorage` — no manual save needed
-- Closing and reopening the tab restores exactly where you left off
-- An **"Unsaved edits"** amber chip appears when content differs from the last imported/loaded state
-- A **beforeunload warning** fires if you try to navigate away with unsaved structural changes
-
-### Preview Mode
-- Click **Preview** in the top bar to see the resume exactly as it will print (no edit handles, no UI overlays)
-- Click **Edit** to go back to editing mode
-- A small "Preview Mode" badge overlays the canvas so you know you're in preview
-
-### Multi-Page Support
-- If your content exceeds one page, **dashed page break lines** appear on the canvas showing exactly where pages will split
-- Page number labels mark each break
-
-### Reset
-- **Reset** button in the top bar replaces all content with the built-in demo resume (Alex Johnson)
-- Requires confirmation — your auto-saved data is still in localStorage until overwritten
+**Dev:** `npm run dev` → http://localhost:5173 &nbsp;|&nbsp; **Build:** `npm run build`
 
 ---
 
-## Keyboard Shortcuts
+## Core
 
-| Shortcut | Action |
-|---|---|
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` / `Ctrl+Shift+Z` | Redo |
-| `Enter` (in a field) | Confirm edit / move to next bullet |
-| `Escape` (in a field) | Cancel edit, revert value |
-| `Backspace` (empty bullet) | Remove bullet |
+- Click any text on the resume to edit it inline — live preview updates instantly
+- Undo / Redo (Ctrl+Z / Ctrl+Y) with up to 50 steps of history
+- Auto-save to localStorage every 5 seconds
+- Named save snapshots via the "Save" button
+- Version history panel — browse and restore any past save
+- Crash recovery — detects unsaved work from a closed session and offers to restore
+- Multi-tab conflict detection — warns if another tab edited the resume
+- Unsaved-changes guard — prompts before navigating away
+- No signup, no account, no data ever sent to a server
+
+---
+
+## Templates (10)
+
+- **Awesome CV** — dark header, colored accent bars, icon contact row (tech / software)
+- **Jake's Resume** — single-column, ATS-optimised, zero visual noise (tech / ATS)
+- **Deedy** — two-column 33/67, sidebar for education & skills (new grad / student)
+- **Twenty Seconds** — dark sidebar, photo, skill dots, experience right panel (consulting)
+- **SB2Nov** — left name, right contact table, double-rule header (finance / business)
+- **Friggeri** — two-tone name header, dark sidebar, timeline experience (executive)
+- **Academic CV** — serif typeface, date-hint column, gray contact band (research / PhD)
+- **Hipster CV** — colorful sidebar, circular photo, rounded skill tags (creative / design)
+- **ModernCV** — colored top stripe, date hints left, banking layout (general)
+- **AltaCV** — two-column 62/38, skill rating dots, icon header (product / PM)
+- Switch templates anytime — all content is preserved automatically
+- "New blank resume" button with confirmation and save-first warning (PDF or JSON)
+
+---
+
+## Resume Sections
+
+- Personal info — name, title, email, phone, location, website, LinkedIn, GitHub, photo
+- Summary / objective
+- Work experience — bullets, dates, location, company link
+- Education — GPA, dates, institution link
+- Skills — grouped by category, interactive skill-level dots / bars (click to set level)
+- Projects — tech stack, dates, project link
+- Certifications
+- Custom sections — user-defined label + bullet list
+- Drag-and-drop section reordering
+- Show / hide individual sections without deleting them
+- Restore deleted sections with one click
+
+---
+
+## Sidebar Panels
+
+- **Guide** — how-to instructions
+- **Contact** — manage photo, all contact links (drag to reorder, toggle visibility, delete)
+- **Style** — accent color, font family, font size, line height, side margin, bullet style, photo shape
+- **Sections** — reorder, toggle, delete, restore, add custom sections
+- **Template** — switch templates, start a new blank resume
+- **History** — browse and restore named saves and crash-recovery snapshots
+- Sidebar is drag-resizable (220 – 480 px)
+
+---
+
+## Photo Editor
+
+- Upload any image as a profile photo
+- Crop, zoom, and rotate with a full in-canvas photo editor
+- Toggle photo visibility without removing it
+
+---
+
+## Export
+
+- Download PDF — pixel-perfect US Letter PDF via html2pdf.js
+- Export JSON backup — portable full resume data file
+- Import JSON backup — restore any previous resume
+- Import `.docx` — auto-parsed into all resume fields via Mammoth.js
+- Import `.txt` — smart section detection and field mapping
+- Import PDF — routes directly to the PDF Direct Editor
+
+---
+
+## PDF Preview Modal
+
+- Full-screen dark overlay showing the resume as a paper card
+- No browser print dialog — contained in-app view
+- Close with Escape key or backdrop click
+
+---
+
+## PDF Direct Editor
+
+- Upload any PDF and edit its text directly in the browser
+- Canvas-accurate rendering — logos, images, icons, badges, underlines, dividers all preserved
+- Click any text element to edit inline
+- Edited fields highlighted in green; reset all edits in one click
+- Zoom in / out controls
+- Toggle PDF canvas layer on / off
+- Download the edited PDF
+- Completely separate from the resume editor
 
 ---
 
 ## Tech Stack
 
-| Library | Version | Purpose |
-|---|---|---|
-| React + TypeScript | 18 | UI |
-| Vite | latest | Build tool |
-| Tailwind CSS | v3 | Styling |
-| Zustand | latest | State management |
-| Framer Motion | latest | Animations |
-| @dnd-kit | latest | Drag-and-drop |
-| html2pdf.js | latest | PDF generation |
-| pdfjs-dist | 5.7.284 | PDF text extraction |
-| mammoth.js | latest | DOCX parsing |
-| lucide-react | 1.16.0 | Icons (note: brand icons are custom SVGs in `src/components/icons/social.tsx`) |
-| react-hot-toast | latest | Toast notifications |
+- React 19 + TypeScript + Vite
+- Tailwind CSS v3
+- Zustand — state management + undo/redo history
+- Framer Motion — animations
+- @dnd-kit — drag and drop
+- html2pdf.js — PDF export
+- PDF.js — PDF parsing and canvas rendering
+- Mammoth — `.docx` parsing
+- React Hot Toast — notifications
+- React Router v7
+- Lucide React — icons
 
 ---
 
-## Project Structure (Key Files)
+## Routes
 
-```
-src/
-  types/resume.ts          — All TypeScript interfaces
-  store/resumeStore.ts     — Zustand store (undo/redo history, all actions)
-  data/defaultResume.ts    — Default demo resume content
-  data/templateConfigs.ts  — Template metadata
-  utils/pdfGenerator.ts    — downloadPDF + savePDFDirect (FSAPI)
-  utils/resumeParser.ts    — PDF / DOCX / TXT import parser
-  utils/nanoid.ts          — ID generator
-  components/
-    icons/social.tsx       — Custom SVGs: Github, Linkedin, Twitter, Instagram, Youtube, Orcid
-    editor/
-      TopBar.tsx           — Undo/Redo, Save PDF, Import, Reset, Download
-      Sidebar.tsx          — Resizable sidebar (default 320px, drag to 220–480px)
-      PhotoEditorModal.tsx — Crop / zoom / rotate photo editor
-      preview/
-        ResumePreview.tsx        — Canvas + page break indicators
-        EditableField.tsx        — Inline edit + rich text toolbar
-        templates/               — 6 template components
-        shared/
-          ContactRow.tsx         — Renders contact links in templates
-          PhotoUpload.tsx        — Photo with reposition overlay
-          CustomSectionBlock.tsx — Renders custom sections
-          EntryLink.tsx          — External link icon next to entries
-      sidebar/
-        GuidePanel.tsx      — How-to guide with hero image
-        ContactPanel.tsx    — Photo + contact link management
-        SettingsPanel.tsx   — Fonts, colors, spacing, shapes
-        SectionsPanel.tsx   — Reorder, delete, restore, add custom sections
-  pages/
-    HomePage.tsx   — Landing page with template gallery + import
-    EditorPage.tsx — Editor shell with keyboard shortcuts
-public/
-  pdf.worker.min.mjs  — PDF.js worker (required for PDF import)
-```
+| Path | Page |
+|------|------|
+| `/` | Home — template gallery, feature overview, import |
+| `/editor` | Resume editor |
+| `/pdf-editor` | PDF Direct Editor |
 
 ---
 
-## Data Storage
+## Storage Keys (localStorage)
 
-- **localStorage key:** `freecv_resume_v2`
-- All resume content, settings, and contact links are serialized as JSON
-- Migration function handles old formats automatically
-- Undo/redo history is **in-memory only** (lost on page refresh — by design, to keep localStorage small)
+| Key | Contents |
+|-----|----------|
+| `freecv_resume` | Current resume data |
+| `freecv_history` | Named save snapshots |
+| `freecv_crash` | Crash recovery buffer |
+
+---
+
+Built by Adarsh Ranjan · Free forever

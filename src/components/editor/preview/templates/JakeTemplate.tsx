@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Jake Resume — ATS-optimised single column.
  * Centered header · pipe-separated contact · small-caps section rules.
  */
@@ -13,7 +13,7 @@ import { PhotoUpload } from '../shared/PhotoUpload';
 interface Props { data: ResumeData; isPrinting: boolean }
 
 export const JakeTemplate: React.FC<Props> = ({ data, isPrinting }) => {
-  const store = useResumeStore();
+  const store = useResumeStore.getState();
   const { settings, personalInfo, sections } = data;
   const visible = (id: string) => sections.some(s => s.id === id && s.visible !== false);
   const fs = settings.fontSize;
@@ -80,132 +80,128 @@ export const JakeTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         </div>
       </div>
 
-      {/* ── Education ── */}
-      {visible('education') && (
-        <div style={gap}>
-          <HR id="education" label="Education" />
-          {data.education.map(edu => (
-            <div key={edu.id} className="group" style={{ marginBottom: 7 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <EditableField value={edu.institution} onChange={v => store.updateEducation(edu.id, 'institution', v)} style={{ fontWeight: 700 }} />
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
-                  <Del onClick={() => store.removeEducation(edu.id)} />
+      {/* ── Sections (ordered by data.sections) ── */}
+      {sections.map(sec => {
+        if (sec.visible === false) return null;
+        switch (sec.id) {
+          case 'education': return (
+            <div key="education" style={gap}>
+              <HR id="education" label="Education" />
+              {data.education.map(edu => (
+                <div key={edu.id} className="group" style={{ marginBottom: 7 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <EditableField value={edu.institution} onChange={v => store.updateEducation(edu.id, 'institution', v)} style={{ fontWeight: 700 }} />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
+                      <Del onClick={() => store.removeEducation(edu.id)} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <EditableField value={edu.degree} onChange={v => store.updateEducation(edu.id, 'degree', v)} style={{ fontStyle: 'italic', color: '#333' }} />
+                    <EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...rest] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', rest.join('').trim()); }} style={{ fontStyle: 'italic', fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
+                  </div>
+                  {edu.gpa && <EditableField value={edu.gpa} onChange={v => store.updateEducation(edu.id, 'gpa', v)} style={{ fontSize: fs - 1 + 'px', color: '#555' }} />}
                 </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <EditableField value={edu.degree} onChange={v => store.updateEducation(edu.id, 'degree', v)} style={{ fontStyle: 'italic', color: '#333' }} />
-                <EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...rest] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', rest.join('').trim()); }} style={{ fontStyle: 'italic', fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
-              </div>
-              {edu.gpa && <EditableField value={edu.gpa} onChange={v => store.updateEducation(edu.id, 'gpa', v)} style={{ fontSize: fs - 1 + 'px', color: '#555' }} />}
+              ))}
+              <Add onClick={() => store.addEducation()} label="+ Add education" />
             </div>
-          ))}
-          <Add onClick={() => store.addEducation()} label="+ Add education" />
-        </div>
-      )}
-
-      {/* ── Experience ── */}
-      {visible('experience') && (
-        <div style={gap}>
-          <HR id="experience" label="Experience" />
-          {data.experience.map(exp => (
-            <div key={exp.id} className="group" style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 700 }} />
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
-                  <Del onClick={() => store.removeExperience(exp.id)} />
+          );
+          case 'experience': return (
+            <div key="experience" style={gap}>
+              <HR id="experience" label="Experience" />
+              {data.experience.map(exp => (
+                <div key={exp.id} className="group" style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 700 }} />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
+                      <Del onClick={() => store.removeExperience(exp.id)} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', fontSize: fs - 0.5 + 'px', color: '#333' }} />
+                    <EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontStyle: 'italic', fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
+                  </div>
+                  <div style={{ paddingLeft: 14, marginTop: 2 }}>
+                    {exp.bullets.map((b, bi) => (
+                      <EditableBullet key={bi} value={b} accentColor="#111" onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />
+                    ))}
+                    <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', fontSize: fs - 0.5 + 'px', color: '#333' }} />
-                <EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontStyle: 'italic', fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />
-              </div>
-              <div style={{ paddingLeft: 14, marginTop: 2 }}>
-                {exp.bullets.map((b, bi) => (
-                  <EditableBullet key={bi} value={b} accentColor="#111" onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />
-                ))}
-                <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
-              </div>
+              ))}
+              <Add onClick={() => store.addExperience()} label="+ Add experience" />
             </div>
-          ))}
-          <Add onClick={() => store.addExperience()} label="+ Add experience" />
-        </div>
-      )}
-
-      {/* ── Projects ── */}
-      {visible('projects') && (
-        <div style={gap}>
-          <HR id="projects" label="Projects" />
-          {data.projects.map(proj => (
-            <div key={proj.id} className="group" style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span>
-                  <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700 }} />
-                  {proj.technologies && <><span style={{ color: '#555' }}> | </span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#333' }} /></>}
-                </span>
-                <Del onClick={() => store.removeProject(proj.id)} />
-              </div>
-              <div style={{ paddingLeft: 14, marginTop: 2 }}>
-                {proj.bullets.map((b, bi) => (
-                  <EditableBullet key={bi} value={b} accentColor="#111" onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />
-                ))}
-                <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
-              </div>
+          );
+          case 'projects': return (
+            <div key="projects" style={gap}>
+              <HR id="projects" label="Projects" />
+              {data.projects.map(proj => (
+                <div key={proj.id} className="group" style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span>
+                      <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700 }} />
+                      {proj.technologies && <><span style={{ color: '#555' }}> | </span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#333' }} /></>}
+                    </span>
+                    <Del onClick={() => store.removeProject(proj.id)} />
+                  </div>
+                  <div style={{ paddingLeft: 14, marginTop: 2 }}>
+                    {proj.bullets.map((b, bi) => (
+                      <EditableBullet key={bi} value={b} accentColor="#111" onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />
+                    ))}
+                    <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
+                  </div>
+                </div>
+              ))}
+              <Add onClick={() => store.addProject()} label="+ Add project" />
             </div>
-          ))}
-          <Add onClick={() => store.addProject()} label="+ Add project" />
-        </div>
-      )}
-
-      {/* ── Skills ── */}
-      {visible('skills') && (
-        <div style={gap}>
-          <HR id="skills" label="Technical Skills" />
-          {data.skills.map(sk => (
-            <div key={sk.id} className="group" style={{ marginBottom: 3, display: 'flex', alignItems: 'baseline', gap: 3, flexWrap: 'wrap' }}>
-              <EditableField value={sk.category} onChange={v => store.updateSkillCategory(sk.id, 'category', v)} style={{ fontWeight: 700 }} />
-              <span style={{ fontWeight: 700 }}>:</span>
-              <EditableField value={sk.skills} onChange={v => store.updateSkillCategory(sk.id, 'skills', v)} style={{ fontSize: fs - 0.5 + 'px', color: '#374151', flex: 1 }} />
-              <Del onClick={() => store.removeSkillCategory(sk.id)} />
+          );
+          case 'skills': return (
+            <div key="skills" style={gap}>
+              <HR id="skills" label="Technical Skills" />
+              {data.skills.map(sk => (
+                <div key={sk.id} className="group" style={{ marginBottom: 3, display: 'flex', alignItems: 'baseline', gap: 3, flexWrap: 'wrap' }}>
+                  <EditableField value={sk.category} onChange={v => store.updateSkillCategory(sk.id, 'category', v)} style={{ fontWeight: 700 }} />
+                  <span style={{ fontWeight: 700 }}>:</span>
+                  <EditableField value={sk.skills} onChange={v => store.updateSkillCategory(sk.id, 'skills', v)} style={{ fontSize: fs - 0.5 + 'px', color: '#374151', flex: 1 }} />
+                  <Del onClick={() => store.removeSkillCategory(sk.id)} />
+                </div>
+              ))}
+              <Add onClick={() => store.addSkillCategory()} label="+ Add skill category" />
             </div>
-          ))}
-          <Add onClick={() => store.addSkillCategory()} label="+ Add skill category" />
-        </div>
-      )}
-
-      {/* ── Certifications ── */}
-      {visible('certifications') && data.certifications.length > 0 && (
-        <div style={gap}>
-          <HR id="certifications" label="Certifications" />
-          {data.certifications.map(c => (
-            <div key={c.id} className="group" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600 }} />
-                {c.issuer && <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#555' }} />}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />}
-                <Del onClick={() => store.removeCertification(c.id)} />
-              </div>
+          );
+          case 'certifications': return data.certifications.length > 0 ? (
+            <div key="certifications" style={gap}>
+              <HR id="certifications" label="Certifications" />
+              {data.certifications.map(c => (
+                <div key={c.id} className="group" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600 }} />
+                    {c.issuer && <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#555' }} />}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#555', flexShrink: 0 }} />}
+                    <Del onClick={() => store.removeCertification(c.id)} />
+                  </div>
+                </div>
+              ))}
+              <Add onClick={() => store.addCertification()} label="+ Add certification" />
             </div>
-          ))}
-          <Add onClick={() => store.addCertification()} label="+ Add certification" />
-        </div>
-      )}
-
-      {/* ── Summary ── */}
-      {visible('summary') && (
-        <div style={gap}>
-          <HR id="summary" label="Summary" />
-          <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#374151', display: 'block' }} />
-        </div>
-      )}
-
-      {/* ── Custom sections ── */}
-      {data.customSections.filter(cs => visible(cs.id)).map(cs => (
-        <CustomSectionBlock key={cs.id} section={cs} accentColor="#111" fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<HR label={cs.title} />} />
-      ))}
+          ) : null;
+          case 'summary': return (
+            <div key="summary" style={gap}>
+              <HR id="summary" label="Summary" />
+              <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#374151', display: 'block' }} />
+            </div>
+          );
+          default: {
+            const cs = data.customSections.find(c => c.id === sec.id);
+            return cs ? (
+              <CustomSectionBlock key={cs.id} section={cs} accentColor="#111" fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<HR label={cs.title} />} />
+            ) : null;
+          }
+        }
+      })}
     </div>
   );
 };

@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, RotateCcw, FileText, Check, Loader2, ArrowDownToLine,
   Eye, EyeOff, AlertTriangle, X, Undo2, Redo2, Save,
-  CloudCheck, CloudOff, CheckCircle2, XCircle,
+  CloudCheck, CloudOff, CheckCircle2,
 } from 'lucide-react';
 import { useResumeStore } from '../../store/resumeStore';
 import { useSaveStore } from '../../store/saveStore';
-import { parseDocx, parseText, parsePdf } from '../../utils/resumeParser';
+import { usePDFEditorStore } from '../../store/pdfEditorStore';
+import { parseDocx, parseText } from '../../utils/resumeParser';
 import { ExportMenu } from './ExportMenu';
 import { useUnsavedGuard } from './UnsavedModal';
 import toast from 'react-hot-toast';
@@ -65,6 +66,7 @@ export const TopBar: React.FC = () => {
   const { lastSaved, isPrinting, isPreviewMode, isDirty, history, future,
           resetResume, loadFromData, setPreviewMode, undo, redo, clearDirty } = useResumeStore();
   const { status: saveStatus, manualSave, saveImportSnapshot } = useSaveStore();
+  const { setPdfFile } = usePDFEditorStore();
 
   const [showReset, setShowReset]       = useState(false);
   const [importOpts, setImportOpts]     = useState<ImportOptions | null>(null);
@@ -101,7 +103,16 @@ export const TopBar: React.FC = () => {
       return;
     }
 
-    // Check for unsaved changes first
+    // PDFs go directly to the PDF Direct Editor
+    if (file.name.toLowerCase().endsWith('.pdf')) {
+      const ok = await guardAsync();
+      if (!ok) return;
+      setPdfFile(file);
+      navigate('/pdf-editor');
+      return;
+    }
+
+    // Check for unsaved changes first (for non-PDF)
     const ok = await guardAsync();
     if (!ok) return;
 
@@ -110,11 +121,7 @@ export const TopBar: React.FC = () => {
     try {
       let data;
       let quality = 50;
-      if (file.name.endsWith('.pdf')) {
-        const result = await parsePdf(file);
-        data    = result.data;
-        quality = result.quality ?? 60;
-      } else if (file.name.endsWith('.docx')) {
+      if (file.name.endsWith('.docx')) {
         const result = await parseDocx(file);
         data    = result.data;
         quality = result.quality ?? 75;
@@ -241,15 +248,14 @@ export const TopBar: React.FC = () => {
 
         <div className="h-6 w-px bg-gray-200 hidden sm:block" />
 
-        {/* Preview toggle */}
+        {/* PDF Preview */}
         <button
           onClick={() => setPreviewMode(!isPreviewMode)}
-          aria-label={isPreviewMode ? 'Switch to edit mode' : 'Switch to preview mode'}
-          aria-pressed={isPreviewMode}
+          aria-label="Toggle PDF preview"
           className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all flex-shrink-0 ${isPreviewMode ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200'}`}
         >
           {isPreviewMode ? <EyeOff size={13} /> : <Eye size={13} />}
-          <span className="hidden sm:inline">{isPreviewMode ? 'Edit' : 'Preview'}</span>
+          <span className="hidden sm:inline">Preview</span>
         </button>
 
         {/* Manual Save */}
@@ -265,7 +271,7 @@ export const TopBar: React.FC = () => {
             : isDirty
               ? <AlertTriangle size={13} />
               : <Save size={13} />}
-          <span className="hidden md:inline">{isDirty ? 'Save' : 'Saved'}</span>
+          <span className="hidden md:inline">Save</span>
         </button>
 
         {/* Import */}
@@ -368,9 +374,9 @@ export const TopBar: React.FC = () => {
                     />
                   </div>
                   <p className="text-[10px] mt-1.5 opacity-80">
-                    {importOpts.quality >= 80 ? 'Excellent — most content detected'
-                    : importOpts.quality >= 60 ? 'Good — review and fill any missing fields'
-                    : 'Partial — manual cleanup recommended'}
+                    {importOpts.quality >= 80 ? 'Excellent - most content detected'
+                    : importOpts.quality >= 60 ? 'Good - review and fill any missing fields'
+                    : 'Partial - manual cleanup recommended'}
                   </p>
                 </div>
 

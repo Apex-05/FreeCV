@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HomePage } from './pages/HomePage';
 import { EditorPage } from './pages/EditorPage';
+import { PDFEditorPage } from './pages/PDFEditorPage';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/editor" element={<EditorPage />} />
+        <Route path="/pdf-editor" element={<PDFEditorPage />} />
       </Routes>
     </BrowserRouter>
   );

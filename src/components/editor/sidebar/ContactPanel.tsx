@@ -124,7 +124,7 @@ export const ContactPanel: React.FC = () => {
           <Camera size={12} /> Profile Photo
         </h3>
         <div className="flex items-center gap-3">
-          <div onClick={() => photoRef.current?.click()} className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 hover:border-indigo-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gray-50 transition-colors flex-shrink-0 relative group">
+          <div onClick={() => photoRef.current?.click()} className="w-16 h-16 rounded-full border border-gray-200 hover:border-indigo-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gray-50 transition-colors flex-shrink-0 relative group">
             {personalInfo.photo
               ? <img src={personalInfo.photo} alt="" className="w-full h-full object-cover" />
               : <Camera size={18} className="text-gray-300" />}
@@ -215,7 +215,7 @@ export const ContactPanel: React.FC = () => {
             </motion.div>
           ) : (
             <button onClick={() => setShowAdd(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-gray-200 text-xs text-gray-400 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 text-xs text-gray-400 hover:text-indigo-600 hover:border-indigo-300 transition-all">
               <Plus size={13} /> Add contact link
             </button>
           )}

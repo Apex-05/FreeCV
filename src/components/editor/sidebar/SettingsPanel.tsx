@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '../../../store/resumeStore';
 import { templateConfigs } from '../../../data/templateConfigs';
@@ -53,7 +53,6 @@ const BULLET_OPTIONS: { value: string; label: string }[] = [
   { value: '–', label: '– Dash' },
   { value: '▪', label: '▪ Square' },
   { value: '◦', label: '◦ Circle' },
-  { value: '', label: 'None' },
 ];
 
 function Slider({ label, icon: Icon, value, min, max, step, unit, onChange, pct }: {
@@ -94,6 +93,10 @@ function Section({ icon: Icon, title, children }: { icon: React.ElementType; tit
 export const SettingsPanel: React.FC = () => {
   const { resume, updateSettings, setTemplate } = useResumeStore();
   const { settings } = resume;
+
+  // Local color state so the picker updates instantly; store write only on commit
+  const [liveColor, setLiveColor] = useState(settings.accentColor);
+  useEffect(() => { setLiveColor(settings.accentColor); }, [settings.accentColor]);
 
   return (
     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="p-4 space-y-6">
@@ -173,9 +176,14 @@ export const SettingsPanel: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500">Custom:</label>
-          <input type="color" value={settings.accentColor} onChange={e => updateSettings({ accentColor: e.target.value })}
-            className="w-8 h-7 rounded cursor-pointer border border-gray-200" />
-          <span className="text-xs font-mono text-gray-500">{settings.accentColor}</span>
+          <input
+            type="color"
+            value={liveColor}
+            onChange={e => setLiveColor(e.target.value)}
+            onBlur={e => updateSettings({ accentColor: e.target.value })}
+            className="w-8 h-7 rounded cursor-pointer border border-gray-200"
+          />
+          <span className="text-xs font-mono text-gray-500">{liveColor}</span>
         </div>
       </Section>
 

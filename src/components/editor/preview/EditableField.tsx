@@ -55,6 +55,8 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
+  // Tracks when user is pressing down on the toolbar — prevents blur from closing it
+  const toolbarDown = useRef(false);
 
   // Sync content from store whenever we're not editing
   useEffect(() => {
@@ -80,8 +82,14 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const startEdit = () => { if (!editing) setEditing(true); };
 
   const handleBlur = (e: React.FocusEvent) => {
+    // If user is clicking on the toolbar, defer — the toolbar pointerdown already fired
+    if (toolbarDown.current) {
+      // Re-focus the field so user can apply formatting
+      setTimeout(() => ref.current?.focus({ preventScroll: true }), 0);
+      return;
+    }
     const related = e.relatedTarget as HTMLElement | null;
-    if (related?.closest?.('[data-fmt-toolbar]')) return; // clicked toolbar
+    if (related?.closest?.('[data-fmt-toolbar]')) return;
     commitAndClose();
   };
 
@@ -106,28 +114,36 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 
   const fmt = (cmd: string, val?: string) => {
     document.execCommand(cmd, false, val ?? undefined);
+    toolbarDown.current = false;
     ref.current?.focus({ preventScroll: true });
+  };
+
+  const handleToolbarPointerDown = (e: React.PointerEvent) => {
+    e.preventDefault(); // prevent blur on the contenteditable
+    toolbarDown.current = true;
+    // Clear flag after the click event fires
+    requestAnimationFrame(() => { toolbarDown.current = false; });
   };
 
   return (
     <span style={{ position: 'relative', display: style?.display ?? 'inline' }}>
       {editing && (
-        <Toolbar onMouseDown={e => e.preventDefault()}>
-          <TBtn onMouseDown={() => fmt('bold')} title="Bold (Ctrl+B)"><Bold size={11} /></TBtn>
-          <TBtn onMouseDown={() => fmt('italic')} title="Italic (Ctrl+I)"><Italic size={11} /></TBtn>
-          <TBtn onMouseDown={() => fmt('underline')} title="Underline (Ctrl+U)"><Underline size={11} /></TBtn>
+        <Toolbar onPointerDown={handleToolbarPointerDown}>
+          <TBtn onPointerDown={() => fmt('bold')} title="Bold (Ctrl+B)"><Bold size={11} /></TBtn>
+          <TBtn onPointerDown={() => fmt('italic')} title="Italic (Ctrl+I)"><Italic size={11} /></TBtn>
+          <TBtn onPointerDown={() => fmt('underline')} title="Underline (Ctrl+U)"><Underline size={11} /></TBtn>
           <Sep />
-          <TBtn onMouseDown={() => fmt('strikeThrough')} title="Strikethrough">
+          <TBtn onPointerDown={() => fmt('strikeThrough')} title="Strikethrough">
             <span style={{ fontSize: 11, fontWeight: 700, textDecoration: 'line-through', fontFamily: 'sans-serif' }}>S</span>
           </TBtn>
-          <TBtn onMouseDown={() => fmt('subscript')} title="Subscript">
+          <TBtn onPointerDown={() => fmt('subscript')} title="Subscript">
             <span style={{ fontFamily: 'sans-serif', fontSize: 10 }}>x<sub style={{ fontSize: 7 }}>2</sub></span>
           </TBtn>
-          <TBtn onMouseDown={() => fmt('superscript')} title="Superscript">
+          <TBtn onPointerDown={() => fmt('superscript')} title="Superscript">
             <span style={{ fontFamily: 'sans-serif', fontSize: 10 }}>x<sup style={{ fontSize: 7 }}>2</sup></span>
           </TBtn>
           <Sep />
-          <TBtn onMouseDown={() => fmt('removeFormat')} title="Clear formatting">
+          <TBtn onPointerDown={() => fmt('removeFormat')} title="Clear formatting">
             <span style={{ fontFamily: 'sans-serif', fontSize: 10, letterSpacing: '-0.5px' }}>T<sub style={{ fontSize: 7, textDecoration: 'line-through' }}>x</sub></span>
           </TBtn>
         </Toolbar>
@@ -166,6 +182,7 @@ export const EditableBullet: React.FC<BulletProps> = ({
   const [editing, setEditing] = useState(false);
   const [hovered, setHovered] = useState(false);
   const bulletChar = useResumeStore(s => s.resume.settings.bulletStyle ?? '•');
+  const toolbarDown = useRef(false);
 
   useEffect(() => {
     if (ref.current && !editing) ref.current.innerHTML = value;
@@ -176,6 +193,10 @@ export const EditableBullet: React.FC<BulletProps> = ({
   }, [editing]);
 
   const handleBlur = (e: React.FocusEvent) => {
+    if (toolbarDown.current) {
+      setTimeout(() => ref.current?.focus({ preventScroll: true }), 0);
+      return;
+    }
     const related = e.relatedTarget as HTMLElement | null;
     if (related?.closest?.('[data-fmt-toolbar]')) return;
     setEditing(false);
@@ -192,7 +213,14 @@ export const EditableBullet: React.FC<BulletProps> = ({
 
   const fmt = (cmd: string) => {
     document.execCommand(cmd, false);
+    toolbarDown.current = false;
     ref.current?.focus({ preventScroll: true });
+  };
+
+  const handleToolbarPointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    toolbarDown.current = true;
+    requestAnimationFrame(() => { toolbarDown.current = false; });
   };
 
   return (
@@ -203,15 +231,15 @@ export const EditableBullet: React.FC<BulletProps> = ({
       onMouseLeave={() => setHovered(false)}
     >
       {editing && (
-        <Toolbar onMouseDown={e => e.preventDefault()}>
-          <TBtn onMouseDown={() => fmt('bold')} title="Bold"><Bold size={11} /></TBtn>
-          <TBtn onMouseDown={() => fmt('italic')} title="Italic"><Italic size={11} /></TBtn>
-          <TBtn onMouseDown={() => fmt('underline')} title="Underline"><Underline size={11} /></TBtn>
+        <Toolbar onPointerDown={handleToolbarPointerDown}>
+          <TBtn onPointerDown={() => fmt('bold')} title="Bold"><Bold size={11} /></TBtn>
+          <TBtn onPointerDown={() => fmt('italic')} title="Italic"><Italic size={11} /></TBtn>
+          <TBtn onPointerDown={() => fmt('underline')} title="Underline"><Underline size={11} /></TBtn>
           <Sep />
-          <TBtn onMouseDown={() => fmt('strikeThrough')} title="Strikethrough">
+          <TBtn onPointerDown={() => fmt('strikeThrough')} title="Strikethrough">
             <span style={{ fontSize: 11, fontWeight: 700, textDecoration: 'line-through', fontFamily: 'sans-serif' }}>S</span>
           </TBtn>
-          <TBtn onMouseDown={() => fmt('removeFormat')} title="Clear formatting">
+          <TBtn onPointerDown={() => fmt('removeFormat')} title="Clear formatting">
             <span style={{ fontFamily: 'sans-serif', fontSize: 10 }}>Tx</span>
           </TBtn>
         </Toolbar>
@@ -245,12 +273,12 @@ export const EditableBullet: React.FC<BulletProps> = ({
 };
 
 // ─── Shared toolbar sub-components ────────────────────────────────────────────
-function Toolbar({ children, onMouseDown }: { children: React.ReactNode; onMouseDown: (e: React.MouseEvent) => void }) {
+function Toolbar({ children, onPointerDown }: { children: React.ReactNode; onPointerDown: (e: React.PointerEvent) => void }) {
   return (
     <div
       data-fmt-toolbar="true"
       className="no-print"
-      onMouseDown={onMouseDown}
+      onPointerDown={onPointerDown}
       style={{
         position: 'absolute', top: -38, left: 0,
         background: '#1f2937', borderRadius: 7, padding: '3px 5px',
@@ -264,10 +292,10 @@ function Toolbar({ children, onMouseDown }: { children: React.ReactNode; onMouse
   );
 }
 
-function TBtn({ onMouseDown, title, children }: { onMouseDown: () => void; title: string; children: React.ReactNode }) {
+function TBtn({ onPointerDown, title, children }: { onPointerDown: () => void; title: string; children: React.ReactNode }) {
   return (
     <button
-      onMouseDown={e => { e.preventDefault(); onMouseDown(); }}
+      onPointerDown={e => { e.preventDefault(); onPointerDown(); }}
       title={title}
       style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d1d5db', padding: '3px 5px', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 22, minHeight: 22 }}
       className="hover:bg-white/15 hover:text-white transition-colors"

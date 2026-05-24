@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { History, RotateCcw, Trash2, Check, Clock3, FilePlus2, FileClock, ShieldCheck, AlertOctagon, ChevronRight, RefreshCw, Database } from 'lucide-react';
+import { History, RotateCcw, Trash2, Check, Clock3, FilePlus2, FileClock, ShieldCheck, AlertOctagon, ChevronRight, Database } from 'lucide-react';
 import { useSaveStore } from '../../../store/saveStore';
 import { useResumeStore } from '../../../store/resumeStore';
 import type { VersionMeta, VersionSource } from '../../../utils/db';
@@ -137,7 +137,7 @@ const VersionCard: React.FC<{
 const SOURCE_GROUPS: VersionSource[] = ['manual', 'import', 'auto'];
 const SOURCE_GROUP_LABELS: Record<VersionSource, string> = {
   manual: 'Manual saves',
-  import: 'Import snapshots',
+  import: 'Uploaded',
   auto:   'Auto-saves',
   crash:  'Crash recovery',
 };
@@ -181,13 +181,6 @@ export const RecoveryPanel: React.FC = () => {
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Version History</h3>
           <p className="text-[10px] text-gray-400 mt-0.5">{versions.length} saved · click label to rename</p>
         </div>
-        <button
-          onClick={() => loadVersions()}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
-          title="Refresh versions"
-        >
-          <RefreshCw size={13} />
-        </button>
       </div>
 
       {/* Crash recovery banner */}

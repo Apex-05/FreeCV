@@ -4,6 +4,7 @@ import { TopBar } from '../components/editor/TopBar';
 import { Sidebar } from '../components/editor/Sidebar';
 import { ResumePreview } from '../components/editor/preview/ResumePreview';
 import { PhotoEditorModal } from '../components/editor/PhotoEditorModal';
+import { PDFPreviewModal } from '../components/editor/PDFPreviewModal';
 import { UnsavedGuardProvider } from '../components/editor/UnsavedModal';
 import { useResumeStore } from '../store/resumeStore';
 import { useSaveStore } from '../store/saveStore';
@@ -117,6 +118,7 @@ const EditorPageInner: React.FC = () => {
           </motion.div>
         </main>
       </div>
+      <PDFPreviewModal />
       {showPhotoEditor && resume.personalInfo.photo && (
         <PhotoEditorModal onClose={() => setShowPhotoEditor(false)} />
       )}

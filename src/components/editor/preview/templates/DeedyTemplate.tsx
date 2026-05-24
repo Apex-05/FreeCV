@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Deedy Resume — Student · Two-column (33 / 67) · Bold header · Lato + Raleway feel.
  * Left: Education, Skills, Contact. Right: Experience, Projects, Awards.
  */
@@ -13,7 +13,7 @@ import { PhotoUpload } from '../shared/PhotoUpload';
 interface Props { data: ResumeData; isPrinting: boolean }
 
 export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
-  const store = useResumeStore();
+  const store = useResumeStore.getState();
   const { settings, personalInfo, sections } = data;
   const visible = (id: string) => sections.some(s => s.id === id && s.visible !== false);
   const acc = settings.accentColor;
@@ -146,80 +146,80 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
           )}
         </div>
 
-        {/* Right (67%) */}
+        {/* Right (67%) — ordered by data.sections, excluding sidebar-fixed items */}
         <div style={{ flex: 1, padding: '12px 24px 40px 20px' }}>
-
-          {/* Summary */}
-          {visible('summary') && (
-            <div style={{ marginBottom: 14 }}>
-              <RSH id="summary" label="Profile" />
-              <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#4a5568', display: 'block', lineHeight: '1.6' }} />
-            </div>
-          )}
-
-          {/* Experience */}
-          {visible('experience') && (
-            <div style={{ marginBottom: 14 }}>
-              <RSH id="experience" label="Experience" />
-              {data.experience.map(exp => (
-                <div key={exp.id} className="group" style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span>
-                      <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 800, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
-                      <span style={{ fontWeight: 400, color: '#718096', margin: '0 6px', fontSize: fs + 'px' }}>|</span>
-                      <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', color: acc, fontSize: fs + 'px' }} />
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ textAlign: 'right', fontSize: fs - 1 + 'px', color: '#718096' }}>
-                        <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} />
-                        {exp.location && <div><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>}
+          {sections.filter(s => !['education', 'skills', 'certifications'].includes(s.id)).map(sec => {
+            if (sec.visible === false) return null;
+            switch (sec.id) {
+              case 'summary': return (
+                <div key="summary" style={{ marginBottom: 14 }}>
+                  <RSH id="summary" label="Profile" />
+                  <EditableField value={data.summary} onChange={v => store.updateSummary(v)} multiline style={{ color: '#4a5568', display: 'block', lineHeight: '1.6' }} />
+                </div>
+              );
+              case 'experience': return (
+                <div key="experience" style={{ marginBottom: 14 }}>
+                  <RSH id="experience" label="Experience" />
+                  {data.experience.map(exp => (
+                    <div key={exp.id} className="group" style={{ marginBottom: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span>
+                          <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 800, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
+                          <span style={{ fontWeight: 400, color: '#718096', margin: '0 6px', fontSize: fs + 'px' }}>|</span>
+                          <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontStyle: 'italic', color: acc, fontSize: fs + 'px' }} />
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <div style={{ textAlign: 'right', fontSize: fs - 1 + 'px', color: '#718096' }}>
+                            <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} />
+                            {exp.location && <div><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>}
+                          </div>
+                          <Del onClick={() => store.removeExperience(exp.id)} />
+                        </div>
                       </div>
-                      <Del onClick={() => store.removeExperience(exp.id)} />
+                      <div style={{ marginTop: 4 }}>
+                        {exp.bullets.map((b, bi) => (
+                          <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />
+                        ))}
+                        <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ marginTop: 4 }}>
-                    {exp.bullets.map((b, bi) => (
-                      <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateExperienceBullet(exp.id, bi, v)} onRemove={() => store.removeExperienceBullet(exp.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addExperienceBullet(exp.id)} />
-                    ))}
-                    <Add onClick={() => store.addExperienceBullet(exp.id)} label="+ Add bullet" />
-                  </div>
+                  ))}
+                  <Add onClick={() => store.addExperience()} label="+ Add experience" />
                 </div>
-              ))}
-              <Add onClick={() => store.addExperience()} label="+ Add experience" />
-            </div>
-          )}
-
-          {/* Projects */}
-          {visible('projects') && (
-            <div style={{ marginBottom: 14 }}>
-              <RSH id="projects" label="Projects" />
-              {data.projects.map(proj => (
-                <div key={proj.id} className="group" style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span>
-                      <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700, color: '#1a202c', fontSize: fs + 1 + 'px' }} />
-                      {proj.technologies && <><span style={{ color: '#718096', margin: '0 4px' }}>|</span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#718096' }} /></>}
-                    </span>
-                    <Del onClick={() => store.removeProject(proj.id)} />
-                  </div>
-                  <div style={{ marginTop: 4 }}>
-                    {proj.bullets.map((b, bi) => (
-                      <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />
-                    ))}
-                    <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
-                  </div>
+              );
+              case 'projects': return (
+                <div key="projects" style={{ marginBottom: 14 }}>
+                  <RSH id="projects" label="Projects" />
+                  {data.projects.map(proj => (
+                    <div key={proj.id} className="group" style={{ marginBottom: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span>
+                          <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700, color: '#1a202c', fontSize: fs + 1 + 'px' }} />
+                          {proj.technologies && <><span style={{ color: '#718096', margin: '0 4px' }}>|</span><EditableField value={proj.technologies} onChange={v => store.updateProject(proj.id, 'technologies', v)} style={{ fontStyle: 'italic', color: '#718096' }} /></>}
+                        </span>
+                        <Del onClick={() => store.removeProject(proj.id)} />
+                      </div>
+                      <div style={{ marginTop: 4 }}>
+                        {proj.bullets.map((b, bi) => (
+                          <EditableBullet key={bi} value={b} accentColor={acc} onChange={v => store.updateProjectBullet(proj.id, bi, v)} onRemove={() => store.removeProjectBullet(proj.id, bi)} isPrinting={isPrinting} onAddNext={() => store.addProjectBullet(proj.id)} />
+                        ))}
+                        <Add onClick={() => store.addProjectBullet(proj.id)} label="+ Add bullet" />
+                      </div>
+                    </div>
+                  ))}
+                  <Add onClick={() => store.addProject()} label="+ Add project" />
                 </div>
-              ))}
-              <Add onClick={() => store.addProject()} label="+ Add project" />
-            </div>
-          )}
-
-          {/* Custom sections */}
-          {data.customSections.filter(cs => visible(cs.id)).map(cs => (
-            <div key={cs.id} style={{ marginBottom: 14 }}>
-              <CustomSectionBlock section={cs} accentColor={acc} fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<RSH label={cs.title} />} />
-            </div>
-          ))}
+              );
+              default: {
+                const cs = data.customSections.find(c => c.id === sec.id);
+                return cs ? (
+                  <div key={cs.id} style={{ marginBottom: 14 }}>
+                    <CustomSectionBlock section={cs} accentColor={acc} fontSize={fs} lineHeight={settings.lineHeight} sectionSpacing={settings.sectionSpacing} isPrinting={isPrinting} headerElement={<RSH label={cs.title} />} />
+                  </div>
+                ) : null;
+              }
+            }
+          })}
         </div>
       </div>
     </div>

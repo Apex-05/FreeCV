@@ -24,7 +24,7 @@ export const templateConfigs: TemplateConfig[] = [
   {
     id: 'deedy',
     name: 'Deedy',
-    description: 'Bold two-column (33/67). Left sidebar for education & skills, right for experience and projects. Great for new grads.',
+    description: 'Bold two-column (33/67). Left sidebar for education & skills, right for experience and projects.',
     category: 'professional',
     tags: ['Student', 'Two-Column', 'New Grad'],
     accentColor: '#2d3748',
