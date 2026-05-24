@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sleep 5 && cat \"C:\\\\Users\\\\ADARSH~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--MITCoding-Sem-Break-Projects-FreeCV\\\\819eb818-848a-4d2c-86eb-11264eeb7437\\\\tasks\\\\bqz5khlul.output\" 2>/dev/null || cat /tmp/bqz5khlul.output 2>/dev/null || echo \"checking\")",
+      "Read(//tmp/**)"
+    ]
+  }
+}
