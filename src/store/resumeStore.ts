@@ -48,6 +48,8 @@ function migrate(raw: Record<string, unknown>): ResumeData {
     if (!s.photoPosition) s.photoPosition = 'center top';
     if (s.bulletStyle === undefined) s.bulletStyle = '•';
     if (s.sideMargin === undefined) s.sideMargin = 0;
+    if (s.columnBgColor === undefined) s.columnBgColor = '';
+    if (s.photoSize === undefined) s.photoSize = 100;
     if (typeof s.template === 'string' && s.template in LEGACY_TEMPLATE_MAP)
       s.template = LEGACY_TEMPLATE_MAP[s.template];
   }

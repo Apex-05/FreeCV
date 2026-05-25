@@ -38,7 +38,7 @@ export const AwesomeCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <div style={{ width: 3, height: 18, background: acc, borderRadius: 2, flexShrink: 0 }} />
-        <h2 style={{ fontSize: fs + 3 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, margin: 0 }}>
+        <h2 style={{ fontSize: fs + 3 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#1a202c', margin: 0 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
             : <span dangerouslySetInnerHTML={{ __html: lbl }} />}

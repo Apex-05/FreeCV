@@ -98,6 +98,14 @@ export const SettingsPanel: React.FC = () => {
   const [liveColor, setLiveColor] = useState(settings.accentColor);
   useEffect(() => { setLiveColor(settings.accentColor); }, [settings.accentColor]);
 
+  const COL_BG_DEFAULTS: Partial<Record<TemplateId, string>> = {
+    friggeri: '#2d2d2d', twentyseconds: '#2c3e50', deedy: '#f7f8fa', hipster: settings.accentColor,
+  };
+  const hasSidebar = (['friggeri', 'twentyseconds', 'deedy', 'hipster'] as TemplateId[]).includes(settings.template);
+  const colBgDefault = COL_BG_DEFAULTS[settings.template] ?? '#e5e7eb';
+  const [liveColBg, setLiveColBg] = useState(settings.columnBgColor || colBgDefault);
+  useEffect(() => { setLiveColBg(settings.columnBgColor || colBgDefault); }, [settings.columnBgColor, settings.template]);
+
   return (
     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="p-4 space-y-6">
 
@@ -187,6 +195,32 @@ export const SettingsPanel: React.FC = () => {
         </div>
       </Section>
 
+      {/* Column Background — only for sidebar templates */}
+      {hasSidebar && (
+        <>
+          <div className="h-px bg-gray-100" />
+          <Section icon={Palette} title="Column Background">
+            <p className="text-[10px] text-gray-400 -mt-1">Left sidebar color, independent of accent</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="color"
+                value={liveColBg}
+                onChange={e => setLiveColBg(e.target.value)}
+                onBlur={e => updateSettings({ columnBgColor: e.target.value })}
+                className="w-8 h-7 rounded cursor-pointer border border-gray-200"
+              />
+              <span className="text-xs font-mono text-gray-500">{liveColBg}</span>
+              {settings.columnBgColor && (
+                <button
+                  onClick={() => { updateSettings({ columnBgColor: '' }); setLiveColBg(colBgDefault); }}
+                  className="ml-auto text-[10px] text-gray-400 hover:text-red-500 transition-colors"
+                >Reset</button>
+              )}
+            </div>
+          </Section>
+        </>
+      )}
+
       <div className="h-px bg-gray-100" />
 
       {/* Bullet Style */}
@@ -226,7 +260,7 @@ export const SettingsPanel: React.FC = () => {
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-gray-400">Shape applies when a photo is uploaded. Hover photo on canvas to reposition.</p>
+        <p className="text-[10px] text-gray-400">Shape applies when a photo is uploaded. Hover photo on canvas to reposition. Resize in Contacts tab.</p>
       </Section>
 
     </motion.div>

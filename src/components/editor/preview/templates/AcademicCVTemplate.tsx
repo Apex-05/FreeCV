@@ -35,7 +35,7 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   const SH = ({ id, label }: { id?: string; label: string }) => {
     const lbl = id ? (sections.find(s => s.id === id)?.label ?? label) : label;
     return (
-      <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, letterSpacing: '0.04em', color: acc, margin: '0 0 8px', textTransform: 'uppercase', borderBottom: `1.5px solid ${acc}55`, paddingBottom: 4 }}>
+      <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, letterSpacing: '0.04em', color: '#1a202c', margin: '0 0 8px', textTransform: 'uppercase', borderBottom: `1.5px solid ${acc}55`, paddingBottom: 4 }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
           : <span dangerouslySetInnerHTML={{ __html: lbl }} />}

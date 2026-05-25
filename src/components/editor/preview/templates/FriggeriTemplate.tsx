@@ -38,21 +38,24 @@ export const FriggeriTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 3 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a202c', margin: 0, borderBottom: `1px solid #e2e8f0`, paddingBottom: 5 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <><span style={{ color: acc }}>{lbl[0]}</span>{lbl.slice(1)}</>}
+            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
         </h2>
       </div>
     );
   };
 
-  const sidebarBg = '#2d2d2d';
+  const sidebarBg = settings.columnBgColor || '#2d2d2d';
   const dateStr = (s: string, e: string) => [s, e].filter(Boolean).join(' – ');
   const visibleLinks = personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
 
   return (
     <div style={{ fontFamily: settings.fontFamily + ', Helvetica Neue, Arial, sans-serif', fontSize: fs + 'px', lineHeight: settings.lineHeight, background: '#fff', color: '#2d3748', display: 'flex', flexDirection: 'column' }}>
-      {/* ── Header Bar ── */}
-      <div style={{ background: '#2d2d2d', padding: `${settings.topMargin * 4 + 20}px 0 16px` }}>
-        <div style={{ paddingLeft: '30%', paddingRight: 40 }}>
+      {/* ── Header Bar — photo top-left, name/title to the right ── */}
+      <div style={{ background: '#2d2d2d', display: 'flex', alignItems: 'flex-end', padding: `${settings.topMargin * 4 + 20}px 0 16px` }}>
+        <div style={{ width: '28%', flexShrink: 0, display: 'flex', justifyContent: 'center', paddingBottom: 4 }}>
+          <PhotoUpload size={78} isPrinting={isPrinting} />
+        </div>
+        <div style={{ paddingRight: 40 }}>
           <EditableField value={personalInfo.name} onChange={v => store.updatePersonalInfo('name', v)}
             style={{ fontSize: fs + 22 + 'px', fontWeight: 300, color: '#fff', letterSpacing: '-0.01em', display: 'block' }} />
           <EditableField value={personalInfo.title} onChange={v => store.updatePersonalInfo('title', v)} placeholder="Position"
@@ -62,11 +65,7 @@ export const FriggeriTemplate: React.FC<Props> = ({ data, isPrinting }) => {
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* ── Left Sidebar ── */}
-        <div style={{ width: '28%', background: sidebarBg, padding: '20px 16px 40px', flexShrink: 0, color: '#e2e8f0' }}>
-          {/* Photo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <PhotoUpload size={72} isPrinting={isPrinting} />
-          </div>
+        <div style={{ width: '28%', background: sidebarBg, padding: '18px 16px 40px', flexShrink: 0, color: '#e2e8f0' }}>
 
           {/* Contact */}
           <div style={{ marginBottom: 16 }}>

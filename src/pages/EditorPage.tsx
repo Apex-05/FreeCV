@@ -62,11 +62,11 @@ const EditorPageInner: React.FC = () => {
     if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
       e.preventDefault();
       useResumeStore.getState().undo();
-      toast('Undone', { duration: 1000, icon: '↩' });
+      toast('Undone', { duration: 1000, icon: '✅' });
     } else if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
       e.preventDefault();
       useResumeStore.getState().redo();
-      toast('Redone', { duration: 1000, icon: '↪' });
+      toast('Redone', { duration: 1000, icon: '✅' });
     }
   }, []);
 

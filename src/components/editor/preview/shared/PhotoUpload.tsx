@@ -25,9 +25,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
 }) => {
   const { resume, updatePersonalInfo, updateSettings } = useResumeStore();
   const { photo } = resume.personalInfo;
-  const { photoShape, photoPosition } = resume.settings;
+  const { photoShape, photoPosition, photoSize } = resume.settings;
   const ref = useRef<HTMLInputElement>(null);
   const [repositioning, setRepositioning] = useState(false);
+
+  // Scale template's default size by user's photoSize percentage (40–120%, default 100%)
+  const effectiveSize = Math.round(size * ((photoSize ?? 100) / 100));
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
@@ -36,7 +39,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
     r.readAsDataURL(f);
   };
 
-  const radius = photoShape === 'circle' ? '50%' : photoShape === 'rounded' ? `${Math.round(size * 0.18)}px` : '6px';
+  const radius = photoShape === 'circle' ? '50%' : photoShape === 'rounded' ? `${Math.round(effectiveSize * 0.18)}px` : '6px';
 
   const showPhoto = resume.personalInfo.showPhoto !== false;
   if (!showPhoto) return null;
@@ -44,23 +47,23 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
   if (isPrinting) {
     return (
       <img src={photo!} alt="Profile"
-        style={{ width: size, height: size, borderRadius: radius, objectFit: 'cover', objectPosition: photoPosition, flexShrink: 0 }} />
+        style={{ width: effectiveSize, height: effectiveSize, borderRadius: radius, objectFit: 'cover', objectPosition: photoPosition, flexShrink: 0 }} />
     );
   }
 
   return (
-    <div className="no-print relative flex-shrink-0 group" style={{ width: size, height: size }}>
+    <div className="no-print relative flex-shrink-0 group" style={{ width: effectiveSize, height: effectiveSize }}>
       <input ref={ref} type="file" accept="image/*" onChange={handleFile} className="hidden" />
 
       <div
         onClick={() => !repositioning && ref.current?.click()}
         className={`overflow-hidden flex items-center justify-center transition-all ${repositioning ? 'cursor-default' : 'cursor-pointer hover:opacity-90'}`}
-        style={{ width: size, height: size, borderRadius: radius, border: `1px solid ${photo ? 'transparent' : borderColor}`, background: photo ? 'transparent' : '#f9fafb' }}
+        style={{ width: effectiveSize, height: effectiveSize, borderRadius: radius, border: `1px solid ${photo ? 'transparent' : borderColor}`, background: photo ? 'transparent' : '#f9fafb' }}
       >
         {photo
           ? <img src={photo} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: photoPosition, borderRadius: radius }} />
           : <div className="text-center text-gray-300">
-              <Camera size={size > 60 ? 20 : 14} />
+              <Camera size={effectiveSize > 60 ? 20 : 14} />
               <div style={{ fontSize: 9, marginTop: 2, lineHeight: 1.2, color: '#9ca3af' }}>Add Photo</div>
             </div>
         }
@@ -82,7 +85,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                   title={pos}
                   className="flex items-center justify-center text-white font-bold transition-colors rounded"
                   style={{
-                    width: Math.round(size / 3) - 2, height: Math.round(size / 3) - 2, fontSize: 11,
+                    width: Math.round(effectiveSize / 3) - 2, height: Math.round(effectiveSize / 3) - 2, fontSize: 11,
                     background: photoPosition === pos ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.15)',
                   }}
                 >

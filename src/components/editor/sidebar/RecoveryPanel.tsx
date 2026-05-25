@@ -156,7 +156,7 @@ export const RecoveryPanel: React.FC = () => {
       const data = await restoreVersion(id);
       if (!data) { toast.error('Could not load this version.'); return; }
       loadFromData(data, true);
-      toast.success(`Restored: ${label}`, { icon: '↩' });
+      toast.success(`Restored: ${label}`, { icon: '✅' });
     } finally {
       setRestoring(null);
     }
@@ -164,7 +164,7 @@ export const RecoveryPanel: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     await deleteVersion(id);
-    toast('Version deleted', { icon: '🗑', duration: 2000 });
+    toast('Version deleted', { icon: '✅', duration: 2000 });
   };
 
   const displayed = filter === 'all' ? versions : versions.filter(v => v.source === filter);

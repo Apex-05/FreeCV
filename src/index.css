@@ -93,8 +93,25 @@
 
 /* Printing */
 @media print {
+  @page { size: 8.5in 11in; margin: 0; }
+
   .no-print { display: none !important; }
-  .resume-page { box-shadow: none !important; }
+  .resume-page { box-shadow: none !important; min-height: auto !important; }
+  .editable-field, .editable-block {
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* PDF export mode: hide entire app shell, show only cloned resume */
+  body[data-pdf-printing] > *:not(#pdf-print-root) { display: none !important; }
+  body[data-pdf-printing] { margin: 0; padding: 0; background: white; }
+  body[data-pdf-printing] #pdf-print-root {
+    display: block;
+    width: 816px;
+    margin: 0 auto;
+    padding: 0;
+  }
 }
 
 @keyframes templateFadeIn {

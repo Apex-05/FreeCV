@@ -109,7 +109,9 @@ export const defaultResume: ResumeData = {
     template: 'awesomecv',
     photoShape: 'circle',
     photoPosition: 'center top',
+    photoSize: 100,
     bulletStyle: '•',
     sideMargin: 0,
+    columnBgColor: '',
   },
 };

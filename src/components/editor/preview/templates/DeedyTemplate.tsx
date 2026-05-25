@@ -58,7 +58,7 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   const dateStr = (s: string, e: string) => [s, e].filter(Boolean).join(' – ');
   const visibleLinks = personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
 
-  const leftBg = '#f7f8fa';
+  const leftBg = settings.columnBgColor || '#f7f8fa';
 
   return (
     <div style={{ fontFamily: settings.fontFamily + ', Lato, sans-serif', fontSize: fs + 'px', lineHeight: settings.lineHeight, background: '#fff', color: '#2d3748', display: 'flex', flexDirection: 'column' }}>

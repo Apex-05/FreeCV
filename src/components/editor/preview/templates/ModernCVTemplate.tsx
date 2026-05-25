@@ -36,7 +36,7 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
     const lbl = id ? (sections.find(s => s.id === id)?.label ?? label) : label;
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: acc, margin: 0, flexShrink: 0 }}>
+        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a202c', margin: 0, flexShrink: 0 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
             : <span dangerouslySetInnerHTML={{ __html: lbl }} />}

@@ -35,7 +35,7 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
     const lbl = id ? (sections.find(s => s.id === id)?.label ?? label) : label;
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, margin: 0 }}>
+        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#1a202c', margin: 0 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
             : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
@@ -72,7 +72,7 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
 
   const dateStr = (s: string, e: string) => [s, e].filter(Boolean).join(' – ');
   const visibleLinks = personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
-  const sidebarBg = acc;
+  const sidebarBg = settings.columnBgColor || acc;
 
   return (
     <div style={{ fontFamily: settings.fontFamily + ', "Nunito", sans-serif', fontSize: fs + 'px', lineHeight: settings.lineHeight, display: 'flex', background: '#fff', color: '#2d3748' }}>

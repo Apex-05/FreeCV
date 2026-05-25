@@ -34,7 +34,7 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   const LSH = ({ id, label }: { id?: string; label: string }) => {
     const lbl = id ? (sections.find(s => s.id === id)?.label ?? label) : label;
     return (
-      <h3 style={{ fontSize: fs + 1 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, margin: '0 0 8px', paddingBottom: 4, borderBottom: `1.5px solid ${acc}` }}>
+      <h3 style={{ fontSize: fs + 1 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#1a202c', margin: '0 0 8px', paddingBottom: 4, borderBottom: `1.5px solid ${acc}` }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
           : <span dangerouslySetInnerHTML={{ __html: lbl }} />}

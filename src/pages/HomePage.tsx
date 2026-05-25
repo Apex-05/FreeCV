@@ -346,6 +346,26 @@ const TEMPLATE_PREVIEWS: Record<string, React.FC<{ accent: string }>> = {
 };
 
 // ─── Animated resume demo (hero right column) ─────────────────────────────────
+
+// Stable constants defined at module scope so they never cause FM to diff/restart
+const FLOAT_ANIMATE    = { y: -14 } as const;
+const FLOAT_TRANSITION = { repeat: Infinity, repeatType: 'mirror' as const, duration: 2.8, ease: [0.37, 0, 0.63, 1] as const };
+
+const SKILLS: [string, number, string][] = [
+  ['React 19',      95, '#6366f1,#818cf8'],
+  ['TypeScript',    90, '#8b5cf6,#a78bfa'],
+  ['Tailwind CSS',  88, '#06b6d4,#6366f1'],
+  ['Framer Motion', 80, '#f59e0b,#f97316'],
+];
+
+// Per-skill transitions are also stable — no new object on every render
+const SKILL_TRANSITIONS = SKILLS.map((_, i) => ({
+  delay: 0.3 + i * 0.18,
+  duration: 1.1,
+  ease: [0.22, 1, 0.36, 1] as const,
+  // NO repeat — bars animate once and stay filled; repeating was the "buffering"
+}));
+
 const RSecHead: React.FC<{ label: string }> = ({ label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
     <div style={{ width: 3, height: 9, background: 'linear-gradient(180deg,#6366f1,#8b5cf6)', borderRadius: 2 }} />
@@ -354,90 +374,69 @@ const RSecHead: React.FC<{ label: string }> = ({ label }) => (
   </div>
 );
 
-const ResumeAnimation: React.FC = () => (
-  <div className="relative select-none" style={{ width: 360, height: 500 }}>
+// React.memo prevents re-renders when parent HomePage state changes (filter, hover, etc.)
+const ResumeAnimation: React.FC = React.memo(() => (
+  <div className="select-none" style={{ width: 460, height: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
     {/* Ambient glow */}
-    <div style={{ position: 'absolute', top: '10%', left: '5%', right: '5%', bottom: '10%', background: 'radial-gradient(ellipse, rgba(99,102,241,0.26) 0%, transparent 68%)', filter: 'blur(22px)', pointerEvents: 'none' }} />
+    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.24) 0%, transparent 68%)', filter: 'blur(20px)', pointerEvents: 'none' }} />
 
-    {/* Main resume card — centered */}
-    <motion.div
-      animate={{ y: [0, -11, 0] }}
-      transition={{ repeat: Infinity, duration: 5.5, ease: 'easeInOut' }}
-      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translateX(-50%) translateY(-50%)', width: 290, background: '#fff', borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 64px rgba(99,102,241,0.3), 0 6px 28px rgba(0,0,0,0.42)' }}
-    >
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg,#1a1d2e 0%,#232840 100%)', padding: '16px 18px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 800 }}>A</div>
-          <div>
-            <div style={{ color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '-0.01em' }}>Alex Johnson</div>
-            <div style={{ color: '#818cf8', fontSize: 9, marginTop: 2 }}>Software Engineer</div>
-          </div>
-        </div>
-      </div>
+    {/* Card + shadow wrapper */}
+    <div style={{ position: 'relative', width: 340, zIndex: 1 }}>
+      {/* Shadow blobs under card — layered for depth */}
+      <div style={{ position: 'absolute', bottom: -36, left: '2%', right: '2%', height: 46, background: 'rgba(99,102,241,0.5)', filter: 'blur(26px)', borderRadius: '50%' }} />
+      <div style={{ position: 'absolute', bottom: -20, left: '18%', right: '18%', height: 22, background: 'rgba(139,92,246,0.35)', filter: 'blur(12px)', borderRadius: '50%' }} />
 
-      {/* Body */}
-      <div style={{ padding: '11px 16px 14px' }}>
-        {/* Experience */}
-        <RSecHead label="Experience" />
-        <div style={{ borderLeft: '2px solid rgba(99,102,241,0.18)', paddingLeft: 8, marginBottom: 11 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: 8.5, fontWeight: 700, color: '#1a202c' }}>Senior Engineer</span>
-            <span style={{ fontSize: 6.5, color: '#94a3b8' }}>2022 - Now</span>
-          </div>
-          <div style={{ fontSize: 7.5, color: '#6366f1', marginTop: 1, fontWeight: 500 }}>Tech Corp · San Francisco</div>
-          <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column' as const, gap: 3 }}>
-            <div style={{ height: 2.5, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
-              <motion.div animate={{ width: ['0%', '84%'] }} transition={{ repeat: Infinity, duration: 1.3, delay: 1.2, repeatDelay: 4.7 }}
-                style={{ height: '100%', background: 'linear-gradient(90deg,#6366f1,#818cf8)', borderRadius: 2 }} />
+      {/* Floating card */}
+      <motion.div
+        animate={FLOAT_ANIMATE}
+        transition={FLOAT_TRANSITION}
+        style={{ borderRadius: 26, overflow: 'hidden', boxShadow: '0 22px 60px rgba(99,102,241,0.32), 0 8px 32px rgba(0,0,0,0.46)' }}
+      >
+        {/* Header */}
+        <div style={{ background: 'linear-gradient(135deg,#1a1d2e 0%,#232840 100%)', padding: '20px 22px 17px', borderRadius: '26px 26px 0 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 17, fontWeight: 800 }}>A</div>
+            <div>
+              <div style={{ color: '#fff', fontSize: 15, fontWeight: 700, letterSpacing: '-0.01em' }}>Apex-05</div>
+              <div style={{ color: '#818cf8', fontSize: 10.5, marginTop: 3 }}>AI/ML Engineer</div>
             </div>
-            <div style={{ height: 2.5, background: '#f1f5f9', borderRadius: 2, width: '62%' }} />
           </div>
         </div>
 
-        {/* Skills */}
-        <RSecHead label="Skills" />
-        <div style={{ marginBottom: 11 }}>
-          {[['React 19', 95, '#6366f1,#818cf8'], ['TypeScript', 90, '#8b5cf6,#a78bfa'], ['Tailwind CSS', 88, '#06b6d4,#6366f1'], ['Framer Motion', 80, '#f59e0b,#f97316']].map(([skill, pct, grad], i) => (
-            <div key={String(skill)} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-              <span style={{ fontSize: 7, color: '#475569', width: 58, flexShrink: 0, fontWeight: 500 }}>{String(skill)}</span>
-              <div style={{ flex: 1, height: 4, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
-                <motion.div initial={{ width: 0 }} animate={{ width: `${Number(pct)}%` }}
-                  transition={{ delay: 0.3 + i * 0.18, duration: 1, ease: 'easeOut', repeat: Infinity, repeatDelay: 4 }}
-                  style={{ height: '100%', background: `linear-gradient(90deg,${String(grad)})`, borderRadius: 3 }} />
+        {/* Body */}
+        <div style={{ padding: '14px 20px 18px', background: '#fff' }}>
+          <RSecHead label="Summary" />
+          <div style={{ marginBottom: 13 }}>
+            <div style={{ fontSize: 7.5, color: '#475569', lineHeight: 1.55 }}>FreeCV is a resume builder built with React 19, TypeScript, and Framer Motion.</div>
+            <div style={{ fontSize: 7.5, color: '#475569', lineHeight: 1.55, marginTop: 3 }}>Edit, preview, and export pixel-perfect PDFs - completely free, no signup required.</div>
+          </div>
+
+          <RSecHead label="Skills" />
+          <div style={{ marginBottom: 13 }}>
+            {SKILLS.map(([skill, pct, grad], i) => (
+              <div key={skill} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 8, color: '#475569', width: 68, flexShrink: 0, fontWeight: 500 }}>{skill}</span>
+                <div style={{ flex: 1, height: 5, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={SKILL_TRANSITIONS[i]}
+                    style={{ height: '100%', background: `linear-gradient(90deg,${grad})`, borderRadius: 3 }}
+                  />
+                </div>
+                <span style={{ fontSize: 7.5, color: '#94a3b8', width: 28, textAlign: 'right' as const }}>{pct}%</span>
               </div>
-              <span style={{ fontSize: 6.5, color: '#94a3b8', width: 24, textAlign: 'right' as const }}>{Number(pct)}%</span>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <RSecHead label="Education" />
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: '#1a202c' }}>MIT, Manipal</div>
+          <div style={{ fontSize: 8, color: '#718096', fontStyle: 'italic', marginTop: 2 }}>B.Tech Computer Science</div>
         </div>
-
-        {/* Education */}
-        <RSecHead label="Education" />
-        <div style={{ fontSize: 8.5, fontWeight: 700, color: '#1a202c' }}>UC Berkeley</div>
-        <div style={{ fontSize: 7, color: '#718096', fontStyle: 'italic', marginTop: 1 }}>B.S. Computer Science · 2020</div>
-      </div>
-    </motion.div>
-
-    {/* Badge: Auto-saved — top right */}
-    <motion.div animate={{ opacity: [0, 1, 1, 0], y: [8, 0, 0, -8] }} transition={{ repeat: Infinity, duration: 5, delay: 1.8 }}
-      style={{ position: 'absolute', top: 10, right: 10, background: '#22c55e', color: '#fff', borderRadius: 20, padding: '5px 12px', fontSize: 10, fontWeight: 700, boxShadow: '0 4px 18px rgba(34,197,94,0.55)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' as const }}>
-      <Check size={9} /> Auto-saved
-    </motion.div>
-
-    {/* Badge: Editing — left */}
-    <motion.div animate={{ opacity: [0, 1, 1, 0], x: [10, 0, 0, 10] }} transition={{ repeat: Infinity, duration: 5, delay: 0.6 }}
-      style={{ position: 'absolute', top: '38%', left: 10, background: '#fff', borderRadius: 11, padding: '6px 12px', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', fontSize: 10, fontWeight: 600, color: '#6366f1', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' as const }}>
-      <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ repeat: Infinity, duration: 0.85 }} style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1' }} />
-      Editing
-    </motion.div>
-
-    {/* Badge: PDF Ready — bottom right */}
-    <motion.div animate={{ opacity: [0, 1, 1, 0], x: [-10, 0, 0, -10] }} transition={{ repeat: Infinity, duration: 5, delay: 3.2 }}
-      style={{ position: 'absolute', bottom: 10, right: 10, background: 'linear-gradient(135deg,#ef4444,#f97316)', color: '#fff', borderRadius: 11, padding: '6px 12px', fontSize: 10, fontWeight: 700, boxShadow: '0 6px 22px rgba(239,68,68,0.42)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' as const }}>
-      <Download size={10} /> PDF Ready
-    </motion.div>
+      </motion.div>
+    </div>
   </div>
-);
+));
 
 function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: () => void }) {
   const [hovered, setHovered] = useState(false);

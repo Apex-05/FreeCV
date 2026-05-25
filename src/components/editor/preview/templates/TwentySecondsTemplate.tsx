@@ -35,7 +35,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
     const lbl = id ? (sections.find(s => s.id === id)?.label ?? label) : label;
     return (
       <div style={{ marginBottom: 8 }}>
-        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: acc, margin: 0, borderBottom: `2px solid ${acc}`, paddingBottom: 4 }}>
+        <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a202c', margin: 0, borderBottom: `2px solid ${acc}`, paddingBottom: 4 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
             : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
@@ -44,7 +44,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
     );
   };
 
-  const sidebarBg = '#2c3e50';
+  const sidebarBg = settings.columnBgColor || '#2c3e50';
   const sidebarText = '#ecf0f1';
   const dateStr = (s: string, e: string) => [s, e].filter(Boolean).join(' – ');
   const visibleLinks = personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
@@ -79,7 +79,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
 
         {/* Contact */}
         <div style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Contact</h3>
+          <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.85)', marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Contact</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {visibleLinks.map(lk => (
               <EditableField key={lk.id} value={lk.value} onChange={v => store.updateContactLink(lk.id, { value: v })} style={{ fontSize: fs - 1.5 + 'px', color: sidebarText, display: 'block', wordBreak: 'break-all' }} />
@@ -90,7 +90,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
         {/* Skills */}
         {visible('skills') && (
           <div style={{ marginBottom: 16 }}>
-            <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Skills</h3>
+            <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.85)', marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Skills</h3>
             {data.skills.map((sk, i) => (
               <div key={sk.id} className="group" style={{ marginBottom: 6 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
@@ -107,7 +107,7 @@ export const TwentySecondsTemplate: React.FC<Props> = ({ data, isPrinting }) => 
         {/* Education on sidebar */}
         {visible('education') && (
           <div>
-            <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Education</h3>
+            <h3 style={{ fontSize: fs - 0.5 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.85)', marginBottom: 6, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 3 }}>Education</h3>
             {data.education.map(edu => (
               <div key={edu.id} className="group" style={{ marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>

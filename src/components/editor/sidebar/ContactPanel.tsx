@@ -92,8 +92,10 @@ function SortableLink({ link, onUpdate, onRemove }: {
 }
 
 export const ContactPanel: React.FC = () => {
-  const { resume, updatePersonalInfo, addContactLink, updateContactLink, removeContactLink, reorderContactLinks } = useResumeStore();
+  const { resume, updatePersonalInfo, updateSettings, addContactLink, updateContactLink, removeContactLink, reorderContactLinks } = useResumeStore();
   const { personalInfo } = resume;
+  const photoSize = resume.settings.photoSize ?? 100;
+  const showPhoto = personalInfo.showPhoto !== false;
   const [showAdd, setShowAdd] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -155,11 +157,30 @@ export const ContactPanel: React.FC = () => {
           <span className="text-xs text-gray-600">Show photo in resume</span>
           <button
             onClick={() => updatePersonalInfo('showPhoto' as keyof typeof personalInfo, !personalInfo.showPhoto as unknown as string)}
-            className={`relative w-9 h-5 rounded-full transition-colors ${personalInfo.showPhoto !== false ? 'bg-indigo-500' : 'bg-gray-200'}`}
+            className={`relative w-9 h-5 rounded-full transition-colors ${showPhoto ? 'bg-indigo-500' : 'bg-gray-200'}`}
           >
-            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${personalInfo.showPhoto !== false ? 'translate-x-4' : 'translate-x-0.5'}`} />
+            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${showPhoto ? 'translate-x-4' : 'translate-x-0.5'}`} />
           </button>
         </div>
+
+        {/* Photo size slider — only when photo is shown */}
+        {showPhoto && (
+          <div className="mt-2.5 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Photo Size</span>
+              <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-600">{photoSize}%</span>
+            </div>
+            <div className="slider-wrap">
+              <input
+                type="range" min={40} max={120} step={5} value={photoSize}
+                onChange={e => updateSettings({ photoSize: parseInt(e.target.value, 10) })}
+                style={{ '--pct': ((photoSize - 40) / (120 - 40)) * 100 + '%' } as React.CSSProperties}
+                className="w-full"
+              />
+            </div>
+            <p className="text-[10px] text-gray-400">Scales relative to each template's default</p>
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-gray-100" />

@@ -102,9 +102,11 @@ export interface ResumeSettings {
   sectionSpacing: number;
   fontFamily: string;
   accentColor: string;
+  columnBgColor?: string;
   template: TemplateId;
   photoShape: 'circle' | 'square' | 'rounded';
   photoPosition: string;
+  photoSize: number;
   bulletStyle: '•' | '▸' | '–' | '▪' | '◦' | '';
   sideMargin: number;
 }

@@ -17,7 +17,7 @@ const ITEMS = [
     id: 'pdf' as const,
     icon: FileOutput,
     label: 'Download PDF',
-    sub:   'Save to Downloads folder',
+    sub:   'Opens print dialog → Save as PDF',
   },
   {
     id: 'json' as const,
@@ -50,7 +50,6 @@ export const ExportMenu: React.FC = () => {
     try {
       if (id === 'pdf') {
         await downloadPDF('resume.pdf');
-        toast.success('PDF downloaded!', { icon: '📄' });
       } else if (id === 'json') {
         const json = JSON.stringify(resume, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
@@ -61,7 +60,7 @@ export const ExportMenu: React.FC = () => {
         });
         a.click();
         URL.revokeObjectURL(url);
-        toast.success('JSON backup downloaded!', { icon: '📦' });
+        toast.success('JSON backup downloaded!', { icon: '✅' });
       }
     } catch (e: unknown) {
       if (e instanceof Error && e.name !== 'AbortError') {

@@ -85,7 +85,7 @@ export const TopBar: React.FC = () => {
       const resume = useResumeStore.getState().resume;
       await manualSave(resume);
       clearDirty();
-      toast.success('Version saved!', { icon: '💾', duration: 2000 });
+      toast.success('Version saved!', { icon: '✅', duration: 2000 });
     } finally {
       setManuallySaving(false);
     }
@@ -211,7 +211,7 @@ export const TopBar: React.FC = () => {
         {/* Undo / Redo */}
         <div className="hidden sm:flex items-center gap-0.5">
           <button
-            onClick={() => { undo(); toast('Undone', { duration: 1000, icon: '↩' }); }}
+            onClick={() => { undo(); toast('Undone', { duration: 1000, icon: '✅' }); }}
             disabled={!canUndo}
             title="Undo (Ctrl+Z)"
             aria-label="Undo"
@@ -220,7 +220,7 @@ export const TopBar: React.FC = () => {
             <Undo2 size={14} />
           </button>
           <button
-            onClick={() => { redo(); toast('Redone', { duration: 1000, icon: '↪' }); }}
+            onClick={() => { redo(); toast('Redone', { duration: 1000, icon: '✅' }); }}
             disabled={!canRedo}
             title="Redo (Ctrl+Y)"
             aria-label="Redo"
