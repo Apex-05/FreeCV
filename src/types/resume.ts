@@ -107,7 +107,7 @@ export interface ResumeSettings {
   photoShape: 'circle' | 'square' | 'rounded';
   photoPosition: string;
   photoSize: number;
-  bulletStyle: '•' | '▸' | '–' | '▪' | '◦' | '';
+  bulletStyle: '•' | '▸' | '–' | '▪' | '◦';
   sideMargin: number;
 }
 

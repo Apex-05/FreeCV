@@ -45,9 +45,34 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
     );
   };
 
-  const Tag = ({ text }: { text: string }) => (
-    <span style={{ display: 'inline-block', background: acc + '20', color: acc, fontSize: fs - 2 + 'px', fontWeight: 600, padding: '2px 8px', borderRadius: 999, border: `1px solid ${acc}40`, marginRight: 4, marginBottom: 4 }}>{text}</span>
+  const Tag = ({ text, onRemove }: { text: string; onRemove?: () => void }) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', background: acc + '20', color: acc, fontSize: fs - 2 + 'px', fontWeight: 600, padding: '2px 8px', borderRadius: 999, border: `1px solid ${acc}40`, marginRight: 4, marginBottom: 4, gap: 3 }}>
+      {text}
+      {onRemove && !isPrinting && (
+        <button onClick={onRemove} className="no-print" style={{ background: 'none', border: 'none', cursor: 'pointer', color: acc, opacity: 0.5, padding: 0, lineHeight: 1, fontSize: 11 }}>×</button>
+      )}
+    </span>
   );
+
+  const TagInput = ({ existing, onAdd }: { existing: string[]; onAdd: (tags: string[]) => void }) => {
+    const [val, setVal] = useState('');
+    const commit = () => {
+      const t = val.trim();
+      if (t && !existing.includes(t)) onAdd([...existing, t]);
+      setVal('');
+    };
+    return (
+      <input
+        className="no-print"
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); commit(); } if (e.key === 'Backspace' && !val && existing.length) { onAdd(existing.slice(0, -1)); } }}
+        onBlur={commit}
+        placeholder="Add tag…"
+        style={{ background: acc + '10', border: `1px solid ${acc}30`, borderRadius: 999, color: acc, fontSize: fs - 2 + 'px', padding: '2px 8px', outline: 'none', width: 80, marginBottom: 4 }}
+      />
+    );
+  };
 
   // Inline tag input: press Tab or Enter to add a tag
   const SkillTagInput = ({ existing, onAdd }: { existing: string[]; onAdd: (tags: string[]) => void }) => {
@@ -198,9 +223,23 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span>
                         <EditableField value={proj.name} onChange={v => store.updateProject(proj.id, 'name', v)} style={{ fontWeight: 700, color: '#1a202c' }} />
-                        {proj.technologies && (
+                        {(proj.technologies || !isPrinting) && (
                           <div style={{ marginTop: 3 }}>
-                            {proj.technologies.split(/[,;]/).map((t, i) => t.trim() && <Tag key={i} text={t.trim()} />)}
+                            {proj.technologies.split(/[,;]/).map((t, i) => {
+                              const tag = t.trim();
+                              return tag ? (
+                                <Tag key={i} text={tag} onRemove={() => {
+                                  const tags = proj.technologies.split(/[,;]/).map(s => s.trim()).filter((_, j) => j !== i);
+                                  store.updateProject(proj.id, 'technologies', tags.join(', '));
+                                }} />
+                              ) : null;
+                            })}
+                            {!isPrinting && (
+                              <TagInput
+                                existing={proj.technologies.split(/[,;]/).map(s => s.trim()).filter(Boolean)}
+                                onAdd={tags => store.updateProject(proj.id, 'technologies', tags.join(', '))}
+                              />
+                            )}
                           </div>
                         )}
                       </span>

@@ -103,14 +103,22 @@
     box-shadow: none !important;
   }
 
-  /* PDF export mode: hide entire app shell, show only cloned resume */
+  /* PDF export mode: hide entire app shell, show only print root */
   body[data-pdf-printing] > *:not(#pdf-print-root) { display: none !important; }
   body[data-pdf-printing] { margin: 0; padding: 0; background: white; }
   body[data-pdf-printing] #pdf-print-root {
     display: block;
-    width: 816px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0;
+  }
+  /* Each child div = one PDF page */
+  body[data-pdf-printing] #pdf-print-root > div {
+    page-break-after: always;
+    break-after: page;
+  }
+  body[data-pdf-printing] #pdf-print-root > div:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
   }
 }
 

@@ -55,8 +55,9 @@ const BULLET_OPTIONS: { value: string; label: string }[] = [
   { value: '◦', label: '◦ Circle' },
 ];
 
-function Slider({ label, icon: Icon, value, min, max, step, unit, onChange, pct }: {
-  label: string; icon: React.ElementType; value: number; min: number; max: number; step: number; unit: string; onChange: (v: number) => void; pct?: number;
+function Slider({ label, icon: Icon, value, min, max, step, unit, onLive, onCommit, pct }: {
+  label: string; icon: React.ElementType; value: number; min: number; max: number; step: number; unit: string;
+  onLive: (v: number) => void; onCommit: (v: number) => void; pct?: number;
 }) {
   const percentage = pct ?? ((value - min) / (max - min)) * 100;
   return (
@@ -70,7 +71,9 @@ function Slider({ label, icon: Icon, value, min, max, step, unit, onChange, pct 
       </div>
       <div className="slider-wrap">
         <input type="range" min={min} max={max} step={step} value={value}
-          onChange={e => onChange(parseFloat(e.target.value))}
+          onChange={e => onLive(parseFloat(e.target.value))}
+          onMouseUp={e => onCommit(parseFloat((e.target as HTMLInputElement).value))}
+          onTouchEnd={e => onCommit(parseFloat((e.target as HTMLInputElement).value))}
           style={{ '--pct': percentage + '%' } as React.CSSProperties}
           className="w-full" />
       </div>
@@ -91,10 +94,10 @@ function Section({ icon: Icon, title, children }: { icon: React.ElementType; tit
 }
 
 export const SettingsPanel: React.FC = () => {
-  const { resume, updateSettings, setTemplate } = useResumeStore();
+  const { resume, updateSettings, updateSettingsLive, setTemplate } = useResumeStore();
   const { settings } = resume;
 
-  // Local color state so the picker updates instantly; store write only on commit
+  // Keep local state in sync when store changes externally (e.g. undo/redo)
   const [liveColor, setLiveColor] = useState(settings.accentColor);
   useEffect(() => { setLiveColor(settings.accentColor); }, [settings.accentColor]);
 
@@ -151,9 +154,9 @@ export const SettingsPanel: React.FC = () => {
         </div>
 
         <Slider label="Font Size" icon={Type} value={settings.fontSize} min={9} max={14} step={0.5} unit="px"
-          onChange={v => updateSettings({ fontSize: v })} />
+          onLive={v => updateSettingsLive({ fontSize: v })} onCommit={v => updateSettings({ fontSize: v })} />
         <Slider label="Line Height" icon={AlignJustify} value={settings.lineHeight} min={1.0} max={2.0} step={0.05} unit=""
-          onChange={v => updateSettings({ lineHeight: v })} />
+          onLive={v => updateSettingsLive({ lineHeight: v })} onCommit={v => updateSettings({ lineHeight: v })} />
       </Section>
 
       <div className="h-px bg-gray-100" />
@@ -161,11 +164,11 @@ export const SettingsPanel: React.FC = () => {
       {/* Spacing */}
       <Section icon={Layout} title="Spacing">
         <Slider label="Top Margin" icon={Rows} value={settings.topMargin} min={0} max={20} step={1} unit="px"
-          onChange={v => updateSettings({ topMargin: v })} />
+          onLive={v => updateSettingsLive({ topMargin: v })} onCommit={v => updateSettings({ topMargin: v })} />
         <Slider label="Section Spacing" icon={Rows} value={settings.sectionSpacing} min={0} max={20} step={1} unit="px"
-          onChange={v => updateSettings({ sectionSpacing: v })} />
+          onLive={v => updateSettingsLive({ sectionSpacing: v })} onCommit={v => updateSettings({ sectionSpacing: v })} />
         <Slider label="Side Padding" icon={Layout} value={settings.sideMargin ?? 0} min={0} max={24} step={2} unit="px"
-          onChange={v => updateSettings({ sideMargin: v })} />
+          onLive={v => updateSettingsLive({ sideMargin: v })} onCommit={v => updateSettings({ sideMargin: v })} />
       </Section>
 
       <div className="h-px bg-gray-100" />
@@ -187,7 +190,7 @@ export const SettingsPanel: React.FC = () => {
           <input
             type="color"
             value={liveColor}
-            onChange={e => setLiveColor(e.target.value)}
+            onChange={e => { setLiveColor(e.target.value); updateSettingsLive({ accentColor: e.target.value }); }}
             onBlur={e => updateSettings({ accentColor: e.target.value })}
             className="w-8 h-7 rounded cursor-pointer border border-gray-200"
           />
@@ -205,7 +208,7 @@ export const SettingsPanel: React.FC = () => {
               <input
                 type="color"
                 value={liveColBg}
-                onChange={e => setLiveColBg(e.target.value)}
+                onChange={e => { setLiveColBg(e.target.value); updateSettingsLive({ columnBgColor: e.target.value }); }}
                 onBlur={e => updateSettings({ columnBgColor: e.target.value })}
                 className="w-8 h-7 rounded cursor-pointer border border-gray-200"
               />

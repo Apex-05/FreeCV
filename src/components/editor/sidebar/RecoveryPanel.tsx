@@ -51,9 +51,10 @@ const VersionCard: React.FC<{
   onRename: (label: string) => void;
 }> = ({ v, onRestore, onDelete, onRename }) => {
   const src = SOURCE_META[v.source];
-  const [editing, setEditing] = useState(false);
-  const [label, setLabel]     = useState(v.label);
-  const [confirmDel, setConfirmDel] = useState(false);
+  const [editing, setEditing]           = useState(false);
+  const [label, setLabel]               = useState(v.label);
+  const [confirmDel, setConfirmDel]     = useState(false);
+  const [confirmRestore, setConfirmRestore] = useState(false);
 
   const commitRename = () => {
     const t = label.trim();
@@ -101,13 +102,27 @@ const VersionCard: React.FC<{
 
         {/* Actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <button
-            onClick={onRestore}
-            title="Restore this version"
-            className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-          >
-            <RotateCcw size={11} />
-          </button>
+          {confirmRestore ? (
+            <div className="flex flex-col items-end gap-1">
+              <p className="text-[9px] text-red-600 font-medium text-right leading-tight max-w-28">Replaces current work.<br />Irreversible.</p>
+              <div className="flex gap-1">
+                <button onClick={() => { setConfirmRestore(false); onRestore(); }} className="px-1.5 py-0.5 rounded text-[9px] bg-red-500 text-white hover:bg-red-600 transition-colors font-semibold">
+                  Restore
+                </button>
+                <button onClick={() => setConfirmRestore(false)} className="px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmRestore(true)}
+              title="Restore this version"
+              className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+            >
+              <RotateCcw size={11} />
+            </button>
+          )}
           {confirmDel ? (
             <>
               <button onClick={onDelete} className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors" title="Confirm delete">

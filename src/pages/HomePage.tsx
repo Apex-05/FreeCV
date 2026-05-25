@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { Download, Zap, Shield, Sparkles, FileText, ArrowRight, ChevronDown, Upload, Star, Check, Users } from 'lucide-react';
@@ -438,6 +438,107 @@ const ResumeAnimation: React.FC = React.memo(() => (
   </div>
 ));
 
+// ─── Interactive dots background (hero) ───────────────────────────────────────
+
+interface Dot { x: number; y: number; vx: number; vy: number; r: number; }
+
+const DotsBackground: React.FC = React.memo(() => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef  = useRef({ x: -9999, y: -9999 });
+  const dotsRef   = useRef<Dot[]>([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current!;
+    const ctx    = canvas.getContext('2d')!;
+    let animId   = 0;
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      // Re-seed dots on resize so they fill new bounds
+      dotsRef.current = Array.from({ length: 70 }, () => ({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r:  Math.random() * 1.2 + 0.4,
+      }));
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const { x: mx, y: my } = mouseRef.current;
+      const dots = dotsRef.current;
+
+      for (const d of dots) {
+        d.x += d.vx; d.y += d.vy;
+        if (d.x < 0) d.x = canvas.width;
+        if (d.x > canvas.width) d.x = 0;
+        if (d.y < 0) d.y = canvas.height;
+        if (d.y > canvas.height) d.y = 0;
+
+        const dx = d.x - mx, dy = d.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120 && dist > 0) {
+          const f = (120 - dist) / 120 * 0.6;
+          d.x += (dx / dist) * f; d.y += (dy / dist) * f;
+        }
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(139,92,246,0.55)';
+        ctx.fill();
+      }
+
+      for (let i = 0; i < dots.length; i++) {
+        for (let j = i + 1; j < dots.length; j++) {
+          const dx = dots[i].x - dots[j].x, dy = dots[i].y - dots[j].y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d < 90) {
+            ctx.beginPath();
+            ctx.moveTo(dots[i].x, dots[i].y);
+            ctx.lineTo(dots[j].x, dots[j].y);
+            ctx.strokeStyle = `rgba(99,102,241,${0.12 * (1 - d / 90)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(animate);
+    };
+
+    resize();
+    animate();
+
+    const onMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+    const onLeave = () => { mouseRef.current = { x: -9999, y: -9999 }; };
+
+    window.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseleave', onLeave);
+    window.addEventListener('resize', resize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('mousemove', onMove);
+      canvas.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+    />
+  );
+});
+
+// ─── Template card ─────────────────────────────────────────────────────────────
+
 function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: () => void }) {
   const [hovered, setHovered] = useState(false);
   const Preview = TEMPLATE_PREVIEWS[config.id];
@@ -560,6 +661,7 @@ export const HomePage: React.FC = () => {
 
       {/* Hero */}
       <section className="min-h-screen flex items-center pt-20 pb-16 px-6 lg:px-16 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1040 50%, #0a0a1a 100%)' }}>
+        <DotsBackground />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full opacity-20 blur-3xl" style={{ background: '#6366f1' }} />
           <div className="absolute bottom-10 right-1/3 w-72 h-72 rounded-full opacity-15 blur-3xl" style={{ background: '#8b5cf6' }} />
@@ -579,7 +681,7 @@ export const HomePage: React.FC = () => {
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="text-5xl sm:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
               <span className="block mb-3">Build your dream</span>
-              <span className="gradient-text block">in minutes, not hours</span>
+              <span className="gradient-text block">in minutes</span>
             </motion.h1>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}

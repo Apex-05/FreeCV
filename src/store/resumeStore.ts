@@ -150,6 +150,7 @@ interface ResumeStore {
   removeCustomSectionEntry: (sectionId: string, entryId: string) => void;
 
   updateSettings: (patch: Partial<ResumeSettings>) => void;
+  updateSettingsLive: (patch: Partial<ResumeSettings>) => void;
   setTemplate: (id: TemplateId) => void;
 
   updateSection: (id: string, patch: Partial<SectionConfig>) => void;
@@ -270,6 +271,9 @@ export const useResumeStore = create<ResumeStore>((set) => ({
 
   // Settings
   updateSettings: (patch) => set(s => upd(s, { ...s.resume, settings: { ...s.resume.settings, ...patch } })),
+  // Live update: mutates settings in place without creating an undo entry or saving.
+  // Use during drag/scrub; call updateSettings with the final value on mouseup/blur.
+  updateSettingsLive: (patch) => set(s => ({ resume: { ...s.resume, settings: { ...s.resume.settings, ...patch } } })),
   setTemplate: (id) => set(s => upd(s, { ...s.resume, settings: { ...s.resume.settings, template: id } })),
 
   // Sections

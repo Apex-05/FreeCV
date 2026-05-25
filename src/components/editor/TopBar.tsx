@@ -283,7 +283,7 @@ export const TopBar: React.FC = () => {
           className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-all disabled:opacity-60 flex-shrink-0"
         >
           {importLoading ? <Loader2 size={13} className="animate-spin" /> : <ArrowDownToLine size={13} />}
-          <span className="hidden sm:inline">Import</span>
+          <span className="hidden sm:inline">Upload</span>
         </button>
 
         {/* Reset */}
