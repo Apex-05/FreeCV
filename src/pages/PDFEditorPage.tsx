@@ -382,6 +382,8 @@ export const PDFEditorPage: React.FC = () => {
   const [error, setError]                     = useState<string | null>(null);
   const [zoom, setZoom]                       = useState(1);
   const [editedTexts, setEditedTexts]         = useState<Record<string, string>>({});
+  const [showBackWarning, setShowBackWarning] = useState(false);
+  const [downloading, setDownloading]         = useState(false);
 
   // ── Undo / Redo ─────────────────────────────────────────────────────────────
   const [undoStack, setUndoStack] = useState<Record<string, string>[]>([]);
@@ -435,9 +437,13 @@ export const PDFEditorPage: React.FC = () => {
 
   // ── PDF loading ──────────────────────────────────────────────────────────────
 
+  const loadAbortRef = useRef(false);
+
   useEffect(() => {
     if (!pdfFile) { navigate('/editor', { replace: true }); return; }
+    loadAbortRef.current = false;
     loadPDF(pdfFile);
+    return () => { loadAbortRef.current = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdfFile]);
 
@@ -458,6 +464,7 @@ export const PDFEditorPage: React.FC = () => {
       const results: PDFPageData[] = [];
 
       for (let p = 1; p <= pdf.numPages; p++) {
+        if (loadAbortRef.current) { pdf.destroy(); return; }
         setLoadingProgress(`Page ${p}/${pdf.numPages} — sampling colors…`);
         const page = await pdf.getPage(p);
 
@@ -476,6 +483,8 @@ export const PDFEditorPage: React.FC = () => {
         ctx.scale(dpr, dpr);
         await page.render({ canvasContext: ctx, viewport }).promise;
         const canvasDataUrl = canvas.toDataURL('image/png');
+        // Release canvas backing store immediately after data URL is captured
+        canvas.width = 0; canvas.height = 0;
 
         // ── Text extraction ──────────────────────────────────────────────────
         const textContent = await page.getTextContent();
@@ -528,8 +537,10 @@ export const PDFEditorPage: React.FC = () => {
           const annotations = await page.getAnnotations({ intent: 'display' });
           for (const ann of annotations) {
             if (ann.subtype !== 'Link') continue;
-            const url: string = ann.url ?? ann.unsafeUrl ?? '';
-            if (!url) continue;
+            const rawUrl: string = ann.url ?? ann.unsafeUrl ?? '';
+            // Only allow http(s) URLs — block javascript:, data:, etc.
+            if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) continue;
+            const url = rawUrl;
             const vr = viewport.convertToViewportRectangle(ann.rect);
             const lx = Math.min(vr[0], vr[2]), ly = Math.min(vr[1], vr[3]);
             const lw = Math.abs(vr[2]-vr[0]),  lh = Math.abs(vr[3]-vr[1]);
@@ -543,13 +554,19 @@ export const PDFEditorPage: React.FC = () => {
 
         // Store CSS pixel dimensions (not the DPR-upscaled canvas dimensions)
         results.push({ index: p-1, canvasDataUrl, width: cssW, height: cssH, textItems });
+        page.cleanup();
       }
 
-      setPages(results);
+      pdf.destroy();
+      if (!loadAbortRef.current) setPages(results);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to load PDF.';
-      setError(msg); toast.error(msg);
-    } finally { setLoading(false); setLoadingProgress(''); }
+      if (!loadAbortRef.current) {
+        const msg = err instanceof Error ? err.message : 'Failed to load PDF.';
+        setError(msg);
+      }
+    } finally {
+      if (!loadAbortRef.current) { setLoading(false); setLoadingProgress(''); }
+    }
   };
 
   // ── Edit handler ─────────────────────────────────────────────────────────────
@@ -582,7 +599,8 @@ export const PDFEditorPage: React.FC = () => {
    * window.print() → browser produces vector-composited PDF.
    */
   const handleDownload = async () => {
-    if (!pages.length) return;
+    if (!pages.length || downloading) return;
+    setDownloading(true);
 
     const printRoot = document.createElement('div');
     printRoot.id = 'pdf-print-root';
@@ -646,20 +664,38 @@ export const PDFEditorPage: React.FC = () => {
     document.body.appendChild(printRoot);
     document.body.setAttribute('data-pdf-printing', '1');
 
-    await new Promise<void>(resolve => {
-      const cleanup = () => {
-        document.body.removeAttribute('data-pdf-printing');
-        printRoot.remove();
-        resolve();
-      };
-      window.addEventListener('afterprint', cleanup, { once: true });
-      const safety = setTimeout(cleanup, 5 * 60 * 1000);
-      window.addEventListener('afterprint', () => clearTimeout(safety), { once: true });
-      setTimeout(() => { try { window.print(); } catch { cleanup(); } }, 80);
-    });
+    try {
+      await new Promise<void>(resolve => {
+        let settled = false;
+        let safetyTimer: ReturnType<typeof setTimeout>;
+        const cleanup = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
+          window.removeEventListener('afterprint', cleanup);
+          document.body.removeAttribute('data-pdf-printing');
+          printRoot.remove();
+          resolve();
+        };
+        window.addEventListener('afterprint', cleanup);
+        safetyTimer = setTimeout(cleanup, 5 * 60 * 1000);
+        setTimeout(() => { try { window.print(); } catch { cleanup(); } }, 80);
+      });
+    } finally {
+      setDownloading(false);
+    }
   };
 
-  const handleBack = () => { clearPdfFile(); navigate('/editor'); };
+  const handleBack = () => {
+    if (Object.keys(editedTexts).length > 0) {
+      setShowBackWarning(true);
+      return;
+    }
+    clearPdfFile();
+    navigate('/editor');
+  };
+
+  const confirmBack = () => { clearPdfFile(); navigate('/editor'); };
 
   const editCount  = Object.keys(editedTexts).length;
   const totalItems = pages.reduce((s, p) => s + p.textItems.filter(i => i.editable).length, 0);
@@ -684,6 +720,14 @@ export const PDFEditorPage: React.FC = () => {
             <p className="text-sm font-semibold text-gray-800 leading-none">PDF Direct Editor</p>
             <p className="text-[10px] text-gray-400 leading-none mt-0.5 max-w-48 truncate">{pdfFile.name}</p>
           </div>
+          <div className="hidden lg:flex items-center gap-2 ml-1">
+            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400 bg-gray-50 border border-gray-200 rounded-full px-2.5 py-0.5 select-none" title="Made for last-minute edits — spot a spelling error or a stray word, fix it in seconds">
+              <span>✦</span> Last-minute edits, in seconds
+            </span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5 select-none" title="This editor overlays text on a fixed PDF canvas. Editing existing words is safe; adding new words can push text outside its original bounding box and break the layout.">
+              <span>⚠</span> Edit existing text only — adding words may break layout
+            </span>
+          </div>
         </div>
         <div className="flex-1" />
 
@@ -695,7 +739,7 @@ export const PDFEditorPage: React.FC = () => {
         </div>
 
         {/* Download — triggers fused print */}
-        <button onClick={handleDownload} disabled={loading || !pages.length}
+        <button onClick={handleDownload} disabled={loading || downloading || !pages.length}
           className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
           <Download size={14} /><span className="hidden sm:inline">Save as PDF</span>
         </button>
@@ -867,6 +911,62 @@ export const PDFEditorPage: React.FC = () => {
         </aside>
 
       </div>
+
+      {/* ── Back-navigation warning modal ────────────────────────────────────── */}
+      <AnimatePresence>
+        {showBackWarning && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)' }}
+            onClick={() => setShowBackWarning(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <AlertTriangle size={22} className="text-amber-500" />
+              </div>
+
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Save before leaving?</h2>
+              <p className="text-sm text-gray-500 leading-relaxed mb-1">
+                You have <span className="font-semibold text-gray-700">{Object.keys(editedTexts).length} unsaved edit{Object.keys(editedTexts).length !== 1 ? 's' : ''}</span>.
+              </p>
+              <p className="text-sm text-gray-500 leading-relaxed mb-5">
+                Snapshots are session-only and will be gone once you leave. Download your PDF first to keep your changes.
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setShowBackWarning(false); handleDownload(); }}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                >
+                  <Download size={14} /> Save as PDF
+                </button>
+                <button
+                  onClick={() => setShowBackWarning(false)}
+                  className="flex-1 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-4 py-2.5 rounded-xl transition-colors"
+                >
+                  Keep editing
+                </button>
+              </div>
+
+              <button
+                onClick={confirmBack}
+                className="mt-3 w-full text-xs text-gray-400 hover:text-gray-600 transition-colors py-1"
+              >
+                Leave without saving
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };

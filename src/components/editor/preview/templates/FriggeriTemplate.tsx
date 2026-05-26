@@ -38,7 +38,7 @@ export const FriggeriTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 3 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a202c', margin: 0, borderBottom: `1px solid #e2e8f0`, paddingBottom: 5 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+            : <span>{lbl}</span>}
         </h2>
       </div>
     );

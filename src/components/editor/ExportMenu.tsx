@@ -31,6 +31,7 @@ export const ExportMenu: React.FC = () => {
   const { isPrinting, resume } = useResumeStore();
   const [open, setOpen]         = useState(false);
   const [busy, setBusy]         = useState<ExportState>('idle');
+  const busyRef                 = useRef(false); // ref-gate prevents double-click race
   const menuRef                 = useRef<HTMLDivElement>(null);
 
   // close on outside click
@@ -44,22 +45,23 @@ export const ExportMenu: React.FC = () => {
   }, [open]);
 
   const run = async (id: ExportState) => {
-    if (busy !== 'idle' || isPrinting) return;
+    if (busyRef.current || isPrinting) return;
+    busyRef.current = true;
     setOpen(false);
     setBusy(id);
+    let url: string | null = null;
     try {
       if (id === 'pdf') {
         await downloadPDF('resume.pdf');
       } else if (id === 'json') {
         const json = JSON.stringify(resume, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
-        const url  = URL.createObjectURL(blob);
-        const a    = Object.assign(document.createElement('a'), {
+        url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), {
           href:     url,
           download: `freecv-backup-${new Date().toISOString().slice(0, 10)}.json`,
         });
         a.click();
-        URL.revokeObjectURL(url);
         toast.success('JSON backup downloaded!', { icon: '✅' });
       }
     } catch (e: unknown) {
@@ -67,6 +69,8 @@ export const ExportMenu: React.FC = () => {
         toast.error('Export failed - please try again.');
       }
     } finally {
+      if (url) URL.revokeObjectURL(url); // always release, even if click threw
+      busyRef.current = false;
       setBusy('idle');
     }
   };

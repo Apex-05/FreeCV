@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useResumeStore } from '../../../../store/resumeStore';
 import { Camera, X, Move } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface PhotoUploadProps {
   size?: number;
@@ -33,9 +34,16 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
   const effectiveSize = Math.round(size * ((photoSize ?? 100) / 100));
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; if (!f) return;
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) {
+      toast.error('Photo must be under 5 MB.');
+      e.target.value = '';
+      return;
+    }
     const r = new FileReader();
     r.onload = ev => updatePersonalInfo('photo', ev.target?.result as string);
+    r.onerror = () => toast.error('Could not read the image file.');
     r.readAsDataURL(f);
   };
 

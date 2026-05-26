@@ -40,7 +40,7 @@ export const JakeTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 1 + 'px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#111', margin: '0 0 2px', paddingBottom: 3, borderBottom: '1px solid #111' }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+            : <span>{lbl}</span>}
         </h2>
       </div>
     );

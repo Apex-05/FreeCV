@@ -135,8 +135,9 @@ export const useSaveStore = create<SaveStore>((set, get) => ({
       } catch {}
       broadcastSave();
       set({ status: 'saved', lastSavedTs: ts });
-    } catch {
+    } catch (err) {
       set({ status: 'failed' });
+      throw err;
     }
   },
 

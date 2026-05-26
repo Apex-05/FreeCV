@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Save, Trash2, X } from 'lucide-react';
 import { useResumeStore } from '../../store/resumeStore';
 import { useSaveStore } from '../../store/saveStore';
+import toast from 'react-hot-toast';
 
 // ── context ───────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,8 @@ export const UnsavedGuardProvider: React.FC<{ children: React.ReactNode }> = ({ 
       await useSaveStore.getState().manualSave(resume, 'Before leaving');
       clearDirty();
       finish(true);
+    } catch {
+      toast.error('Save failed. You can still leave or try again.');
     } finally {
       setSaving(false);
     }

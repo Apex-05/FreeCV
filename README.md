@@ -12,7 +12,7 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 - Undo / Redo (Ctrl+Z / Ctrl+Y) with up to 50 steps of history
 - Auto-save to localStorage every 5 seconds
 - Named save snapshots via the "Save" button
-- Version history panel — browse and restore any past save
+- Version history panel — browse and restore any past save (auto / manual / import / crash)
 - Crash recovery — detects unsaved work from a closed session and offers to restore
 - Multi-tab conflict detection — warns if another tab edited the resume
 - Unsaved-changes guard — prompts before navigating away
@@ -33,7 +33,7 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 - **ModernCV** — colored top stripe, date hints left, banking layout (general)
 - **AltaCV** — two-column 62/38, skill rating dots, icon header (product / PM)
 - Switch templates anytime — all content is preserved automatically
-- "New blank resume" button with confirmation and save-first warning (PDF or JSON)
+- Section order is respected across all templates (drag-and-drop reordering)
 
 ---
 
@@ -44,10 +44,10 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 - Work experience — bullets, dates, location, company link
 - Education — GPA, dates, institution link
 - Skills — grouped by category, interactive skill-level dots / bars (click to set level)
-- Projects — tech stack, dates, project link
+- Projects — tech stack tags (individually removable, inline add), dates, project link
 - Certifications
 - Custom sections — user-defined label + bullet list
-- Drag-and-drop section reordering
+- Drag-and-drop section reordering — order applied consistently in all templates
 - Show / hide individual sections without deleting them
 - Restore deleted sections with one click
 
@@ -57,10 +57,16 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 
 - **Guide** — how-to instructions
 - **Contact** — manage photo, all contact links (drag to reorder, toggle visibility, delete)
-- **Style** — accent color, font family, font size, line height, side margin, bullet style, photo shape
+- **Style** — full live-preview controls (no lag while dragging):
+  - Accent color — 12 presets + custom color picker
+  - Column background color — independent sidebar color for two-column templates (Friggeri, Deedy, TwentySeconds, Hipster)
+  - Font family — grouped sans-serif / serif picker with live preview
+  - Font size, line height, top margin, section spacing, side padding — all update live while dragging, undo entry only on release
+  - Bullet style — 5 options (•  ▸  –  ▪  ◦)
+  - Photo shape — circle, square, rounded
 - **Sections** — reorder, toggle, delete, restore, add custom sections
 - **Template** — switch templates, start a new blank resume
-- **History** — browse and restore named saves and crash-recovery snapshots
+- **History** — browse and restore named saves and crash-recovery snapshots; filter by type; rename or delete entries
 - Sidebar is drag-resizable (220 – 480 px)
 
 ---
@@ -70,38 +76,59 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 - Upload any image as a profile photo
 - Crop, zoom, and rotate with a full in-canvas photo editor
 - Toggle photo visibility without removing it
+- Photo shape follows the Style panel setting (circle / square / rounded)
 
 ---
 
 ## Export
 
-- Download PDF — pixel-perfect US Letter PDF via html2pdf.js
-- Export JSON backup — portable full resume data file
+- **Download PDF** — pixel-perfect US Letter PDF via browser print dialog
+- **Export JSON backup** — portable full resume data file
 - Import JSON backup — restore any previous resume
-- Import `.docx` — auto-parsed into all resume fields via Mammoth.js
+- Import `.docx` — auto-parsed into all resume fields via Mammoth.js + import quality score
 - Import `.txt` — smart section detection and field mapping
-- Import PDF — routes directly to the PDF Direct Editor
-
----
-
-## PDF Preview Modal
-
-- Full-screen dark overlay showing the resume as a paper card
-- No browser print dialog — contained in-app view
-- Close with Escape key or backdrop click
+- Import / Upload PDF — routes directly to the PDF Direct Editor
 
 ---
 
 ## PDF Direct Editor
 
-- Upload any PDF and edit its text directly in the browser
-- Canvas-accurate rendering — logos, images, icons, badges, underlines, dividers all preserved
+A fully self-contained PDF text editor — no re-upload needed after editing.
+
+### Rendering
+- High-DPI canvas rendering — crisp at any device pixel ratio (Retina / 4K)
+- Each page rendered to an offscreen canvas; shown as a background image so all graphics, logos, icons, dividers, and decorations are pixel-perfect
+- Transparent text overlays sit on top — original PDF shows through unless a field is actively edited
+
+### Text Editing
 - Click any text element to edit inline
-- Edited fields highlighted in green; reset all edits in one click
-- Zoom in / out controls
-- Toggle PDF canvas layer on / off
-- Download the edited PDF
-- Completely separate from the resume editor
+- Font size, font family (serif / sans-serif / monospace mapped from PDF), weight, and style are extracted from the PDF so edited text matches the original visually
+- **Bold detection** — dual strategy: font-name pattern matching + canvas pixel-density sampling (catches embedded/subset fonts whose names don't contain "bold")
+- White cover dynamically sized to the actual rendered CSS width (measured via `scrollWidth`) so neither the original nor the edited text bleeds through
+- Editing box is unconstrained — no page-boundary clipping while typing
+- Emoji / pictographic items are non-editable; the PDF canvas renders them faithfully
+- Link annotations detected and shown as tooltips
+
+### Edit Management
+- Edited fields highlighted with a green outline; clean fields remain transparent
+- Undo / Redo (Ctrl+Z / Ctrl+Y) — up to 50 steps
+- Reset all edits in one click
+- **Named snapshots** — save the current set of edits with a custom label; up to 20 snapshots per session; rename or delete from the sidebar
+- Restore any snapshot to jump back to an earlier editing state
+
+### Export
+- **Fused PDF export** — builds a hidden print DOM: original canvas image as the base layer + white-cover + new-text divs only for edited items; `window.print()` produces a composited PDF
+- Multi-page PDFs fully supported — each page breaks correctly in the output
+- Zoom in / out (40 % – 200 %) for comfortable editing
+
+---
+
+## Home Page
+
+- Animated interactive dots canvas on the hero background — dots drift continuously and repel from the cursor
+- Template gallery with category filter (all / professional / creative / academic)
+- Mini live-rendered previews for every template
+- One-click import from the hero (PDF → PDF Editor; .docx/.txt → resume editor)
 
 ---
 
@@ -109,15 +136,15 @@ Free, browser-based resume builder. No account. No server. Everything stays loca
 
 - React 19 + TypeScript + Vite
 - Tailwind CSS v3
-- Zustand — state management + undo/redo history
+- Zustand — state management, undo/redo history, live (no-history) settings updates
 - Framer Motion — animations
 - @dnd-kit — drag and drop
-- html2pdf.js — PDF export
-- PDF.js — PDF parsing and canvas rendering
+- PDF.js (`pdfjs-dist`) — PDF parsing, canvas rendering, text + annotation extraction
 - Mammoth — `.docx` parsing
 - React Hot Toast — notifications
 - React Router v7
 - Lucide React — icons
+- nanoid — collision-free IDs
 
 ---
 

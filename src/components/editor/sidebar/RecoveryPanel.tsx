@@ -178,8 +178,12 @@ export const RecoveryPanel: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteVersion(id);
-    toast('Version deleted', { icon: '✅', duration: 2000 });
+    try {
+      await deleteVersion(id);
+      toast('Version deleted', { icon: '✅', duration: 2000 });
+    } catch {
+      toast.error('Could not delete version. Try again.');
+    }
   };
 
   const displayed = filter === 'all' ? versions : versions.filter(v => v.source === filter);

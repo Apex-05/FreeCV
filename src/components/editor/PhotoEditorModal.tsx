@@ -92,6 +92,9 @@ export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
       setOffset({ x: 0, y: 0 });
       setRotation(0);
     };
+    img.onerror = () => {
+      import('react-hot-toast').then(({ default: toast }) => toast.error('Could not load the photo. It may be corrupted.'));
+    };
     img.src = src;
   }, [src]);
 

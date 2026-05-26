@@ -15,7 +15,9 @@ export const EntryLink: React.FC<EntryLinkProps> = ({ link, onUpdate, isPrinting
 
   const openLink = () => {
     if (!link) return;
-    const url = link.startsWith('http') ? link : `https://${link}`;
+    const url = /^https?:\/\//i.test(link) ? link : `https://${link}`;
+    // block non-http(s) schemes (javascript:, data:, etc.)
+    if (!/^https?:\/\//i.test(url)) return;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

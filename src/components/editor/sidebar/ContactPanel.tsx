@@ -7,6 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useResumeStore } from '../../../store/resumeStore';
 import type { ContactLink, ContactLinkType } from '../../../types/resume';
 import { Mail, Phone, MapPin, Globe, Link2, GripVertical, Eye, EyeOff, Trash2, Plus, Camera } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Github, Linkedin, Twitter, Instagram, Youtube, Orcid } from '../../icons/social';
 
 export const CONTACT_ICONS: Record<ContactLinkType, React.ElementType> = {
@@ -113,8 +114,14 @@ export const ContactPanel: React.FC = () => {
   const photoRef = React.useRef<HTMLInputElement>(null);
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
+    if (f.size > 5 * 1024 * 1024) {
+      toast.error('Photo must be under 5 MB.');
+      e.target.value = '';
+      return;
+    }
     const r = new FileReader();
     r.onload = ev => updatePersonalInfo('photo', ev.target?.result as string);
+    r.onerror = () => toast.error('Could not read the image file.');
     r.readAsDataURL(f);
   };
 
@@ -140,9 +147,9 @@ export const ContactPanel: React.FC = () => {
               <>
                 <button
                   onClick={() => window.dispatchEvent(new Event('freecv:open-photo-editor'))}
-                  className="block text-xs text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 hover:border-indigo-300 px-2.5 py-1 rounded-lg transition-all"
                 >
-                  ✏️ Edit (crop, zoom, rotate)
+                  Edit photo
                 </button>
                 <button onClick={() => updatePersonalInfo('photo', null)} className="block text-xs text-red-400 hover:text-red-600 transition-colors">
                   Remove photo
@@ -156,7 +163,7 @@ export const ContactPanel: React.FC = () => {
         <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-100">
           <span className="text-xs text-gray-600">Show photo in resume</span>
           <button
-            onClick={() => updatePersonalInfo('showPhoto' as keyof typeof personalInfo, !personalInfo.showPhoto as unknown as string)}
+            onClick={() => updatePersonalInfo('showPhoto', !personalInfo.showPhoto)}
             className={`relative w-9 h-5 rounded-full transition-colors ${showPhoto ? 'bg-indigo-500' : 'bg-gray-200'}`}
           >
             <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${showPhoto ? 'translate-x-4' : 'translate-x-0.5'}`} />

@@ -38,7 +38,7 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
       <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, letterSpacing: '0.04em', color: '#1a202c', margin: '0 0 8px', textTransform: 'uppercase', borderBottom: `1.5px solid ${acc}55`, paddingBottom: 4 }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-          : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+          : <span>{lbl}</span>}
       </h2>
     );
   };

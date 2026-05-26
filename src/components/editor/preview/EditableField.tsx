@@ -58,10 +58,10 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   // Tracks when user is pressing down on the toolbar — prevents blur from closing it
   const toolbarDown = useRef(false);
 
-  // Sync content from store whenever we're not editing
+  // Sync content from store whenever we're not editing — sanitize on read path to block stored XSS
   useEffect(() => {
     if (ref.current && !editing) {
-      ref.current.innerHTML = value || '';
+      ref.current.innerHTML = sanitize(value || '');
     }
   }, [value, editing]);
 
@@ -97,7 +97,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
     setEditing(false);
     if (!ref.current) return;
     const newVal = sanitize(ref.current.innerHTML);
-    if (newVal !== value) onChange(newVal || value);
+    if (newVal !== value) onChange(newVal);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -185,7 +185,7 @@ export const EditableBullet: React.FC<BulletProps> = ({
   const toolbarDown = useRef(false);
 
   useEffect(() => {
-    if (ref.current && !editing) ref.current.innerHTML = value;
+    if (ref.current && !editing) ref.current.innerHTML = sanitize(value);
   }, [value, editing]);
 
   useEffect(() => {

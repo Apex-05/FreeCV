@@ -26,12 +26,13 @@ export interface VersionRecord extends VersionMeta {
 
 let _db: IDBDatabase | null = null;
 let _opening = false;
-const _waiters: Array<(db: IDBDatabase) => void> = [];
+type Waiter = { resolve: (db: IDBDatabase) => void; reject: (e: unknown) => void };
+const _waiters: Waiter[] = [];
 
 function openDB(): Promise<IDBDatabase> {
   if (_db) return Promise.resolve(_db);
   return new Promise((resolve, reject) => {
-    _waiters.push(resolve);
+    _waiters.push({ resolve, reject });
     if (_opening) return;
     _opening = true;
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -46,14 +47,16 @@ function openDB(): Promise<IDBDatabase> {
     req.onsuccess = e => {
       _db = (e.target as IDBOpenDBRequest).result;
       const db = _db!;
-      _waiters.forEach(fn => fn(db));
-      _waiters.length = 0;
+      _opening = false;
+      const waiting = _waiters.splice(0);
+      waiting.forEach(w => w.resolve(db));
     };
     req.onerror = () => {
       const err = req.error;
       _opening = false;
-      _waiters.length = 0;
-      reject(err);
+      _db = null;
+      const waiting = _waiters.splice(0);
+      waiting.forEach(w => w.reject(err));
     };
   });
 }

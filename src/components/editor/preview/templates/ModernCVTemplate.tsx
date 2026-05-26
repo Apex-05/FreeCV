@@ -39,7 +39,7 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 2 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a202c', margin: 0, flexShrink: 0 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+            : <span>{lbl}</span>}
         </h2>
         <div style={{ flex: 1, height: 1.5, background: acc }} />
       </div>

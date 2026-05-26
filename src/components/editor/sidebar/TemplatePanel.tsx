@@ -23,28 +23,31 @@ export const TemplatePanel: React.FC = () => {
   const handleSavePDF = async () => {
     try {
       await downloadPDF('resume-backup.pdf');
-      toast.success('PDF saved!');
+      toast('Print dialog opened — choose "Save as PDF" to download.', { duration: 5000, icon: '🖨️' });
     } catch {
-      toast.error('Could not save PDF.');
+      toast.error('Could not open print dialog.');
     }
   };
 
   const handleSaveJSON = () => {
     const blob = new Blob([JSON.stringify(resume, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement('a'), {
-      href:     url,
-      download: `resume-backup-${new Date().toISOString().slice(0, 10)}.json`,
-    });
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('JSON backup saved!');
+    try {
+      const a = Object.assign(document.createElement('a'), {
+        href:     url,
+        download: `resume-backup-${new Date().toISOString().slice(0, 10)}.json`,
+      });
+      a.click();
+      toast.success('JSON backup saved!');
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleConfirmReset = () => {
     resetResume();
     setShowWarning(false);
-    toast.success('Started a new blank resume.');
+    toast.success('Reset to default resume');
   };
 
   return (

@@ -72,22 +72,39 @@ async function preparePrint(): Promise<() => void> {
   return cleanup;
 }
 
+let _printInProgress = false;
+
 export async function downloadPDF(_filename = 'resume.pdf') {
-  const cleanup = await preparePrint();
+  if (_printInProgress) return;
+  _printInProgress = true;
+  let cleanup: (() => void) | null = null;
+  try {
+    cleanup = await preparePrint();
+  } catch (e) {
+    _printInProgress = false;
+    throw e;
+  }
 
   await new Promise<void>((resolve, reject) => {
-    const done = () => { cleanup(); resolve(); };
+    let settled = false;
+    let safetyTimer: ReturnType<typeof setTimeout>;
 
-    // afterprint fires when the print dialog closes (print or cancel)
-    window.addEventListener('afterprint', done, { once: true });
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(safetyTimer);
+      window.removeEventListener('afterprint', done);
+      cleanup!();
+      _printInProgress = false;
+      resolve();
+    };
 
-    // Safety net: if afterprint never fires (some browsers), clean up after 5 min
-    const safety = setTimeout(done, 5 * 60 * 1000);
-    window.addEventListener('afterprint', () => clearTimeout(safety), { once: true });
+    window.addEventListener('afterprint', done);
+    safetyTimer = setTimeout(done, 5 * 60 * 1000);
 
     setTimeout(() => {
       try { window.print(); }
-      catch (e) { clearTimeout(safety); cleanup(); reject(e); }
+      catch (e) { done(); reject(e); }
     }, 60);
   });
 }

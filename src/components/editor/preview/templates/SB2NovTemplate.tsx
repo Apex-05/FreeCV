@@ -39,7 +39,7 @@ export const SB2NovTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 1 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a202c', margin: 0, borderBottom: `2px solid ${acc}`, paddingBottom: 4 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+            : <span>{lbl}</span>}
         </h2>
       </div>
     );

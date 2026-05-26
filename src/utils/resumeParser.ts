@@ -146,24 +146,32 @@ export async function parsePdf(file: File): Promise<ParseResult> {
   }
 
   const pageTexts: string[] = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    type Item = { str: string; transform: number[] };
-    const items = content.items as Item[];
-    const lineMap = new Map<number, string[]>();
-    for (const item of items) {
-      if (!item.str.trim()) continue;
-      const y = Math.round(item.transform[5] / 5) * 5;
-      const row = lineMap.get(y) ?? [];
-      row.push(item.str);
-      lineMap.set(y, row);
+  try {
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      try {
+        const content = await page.getTextContent();
+        type Item = { str: string; transform: number[] };
+        const items = content.items as Item[];
+        const lineMap = new Map<number, string[]>();
+        for (const item of items) {
+          if (!item.str.trim()) continue;
+          const y = Math.round(item.transform[5] / 5) * 5;
+          const row = lineMap.get(y) ?? [];
+          row.push(item.str);
+          lineMap.set(y, row);
+        }
+        const sortedLines = [...lineMap.entries()]
+          .sort((a, b) => b[0] - a[0])
+          .map(([, parts]) => parts.join(' ').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        pageTexts.push(sortedLines.join('\n'));
+      } finally {
+        page.cleanup();
+      }
     }
-    const sortedLines = [...lineMap.entries()]
-      .sort((a, b) => b[0] - a[0])
-      .map(([, parts]) => parts.join(' ').replace(/\s+/g, ' ').trim())
-      .filter(Boolean);
-    pageTexts.push(sortedLines.join('\n'));
+  } finally {
+    pdf.destroy();
   }
 
   const combined = pageTexts.join('\n');

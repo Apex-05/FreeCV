@@ -70,12 +70,26 @@ function load(): ResumeData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return migrate(JSON.parse(raw) as Record<string, unknown>);
-  } catch {}
+  } catch (e) {
+    console.warn('[FreeCV] Failed to load resume from localStorage — falling back to default.', e);
+  }
   return defaultResume;
 }
 
 function save(data: ResumeData) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
+      console.warn('[FreeCV] localStorage quota exceeded — attempting save without photo.');
+      try {
+        const fallback = { ...data, personalInfo: { ...data.personalInfo, photo: null } };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback));
+        // Notify via a custom event so the UI can surface the warning
+        window.dispatchEvent(new CustomEvent('freecv:quota-exceeded'));
+      } catch { /* truly full — nothing we can do */ }
+    }
+  }
 }
 
 type StoreBase = { resume: ResumeData; history: ResumeData[]; future: ResumeData[] };
@@ -91,8 +105,7 @@ const withHistory = (s: StoreBase, resume: ResumeData, isDirty: boolean) => {
   };
 };
 
-const upd = (s: StoreBase, resume: ResumeData) => withHistory(s, resume, false);
-const updDirty = (s: StoreBase, resume: ResumeData) => withHistory(s, resume, true);
+const upd = (s: StoreBase, resume: ResumeData) => withHistory(s, resume, true);
 
 interface ResumeStore {
   resume: ResumeData;
@@ -101,7 +114,7 @@ interface ResumeStore {
   history: ResumeData[];
   future: ResumeData[];
 
-  updatePersonalInfo: (field: keyof PersonalInfo, value: string | null) => void;
+  updatePersonalInfo: (field: keyof PersonalInfo, value: string | boolean | null) => void;
   addContactLink: (type: ContactLinkType) => void;
   updateContactLink: (id: string, patch: Partial<ContactLink>) => void;
   removeContactLink: (id: string) => void;
@@ -180,7 +193,7 @@ export const useResumeStore = create<ResumeStore>((set) => ({
   future: [],
 
   updatePersonalInfo: (field, value) =>
-    set(s => updDirty(s, { ...s.resume, personalInfo: { ...s.resume.personalInfo, [field]: value } })),
+    set(s => upd(s, { ...s.resume, personalInfo: { ...s.resume.personalInfo, [field]: value } })),
 
   addContactLink: (type) =>
     set(s => {
@@ -205,19 +218,19 @@ export const useResumeStore = create<ResumeStore>((set) => ({
   reorderContactLinks: (links) =>
     set(s => upd(s, { ...s.resume, personalInfo: { ...s.resume.personalInfo, contactLinks: links } })),
 
-  updateSummary: (v) => set(s => updDirty(s, { ...s.resume, summary: v })),
+  updateSummary: (v) => set(s => upd(s, { ...s.resume, summary: v })),
 
   // Education
-  addEducation: () => set(s => updDirty(s, { ...s.resume, education: [...s.resume.education, { id: nanoid(), institution: 'University Name', location: 'City, State', degree: 'Degree in Major', startDate: 'Jan 2020', endDate: 'May 2024', gpa: '', link: '', bullets: [] }] })),
-  updateEducation: (id, field, value) => set(s => updDirty(s, { ...s.resume, education: s.resume.education.map(e => e.id === id ? { ...e, [field]: value } : e) })),
+  addEducation: () => set(s => upd(s, { ...s.resume, education: [...s.resume.education, { id: nanoid(), institution: 'University Name', location: 'City, State', degree: 'Degree in Major', startDate: 'Jan 2020', endDate: 'May 2024', gpa: '', link: '', bullets: [] }] })),
+  updateEducation: (id, field, value) => set(s => upd(s, { ...s.resume, education: s.resume.education.map(e => e.id === id ? { ...e, [field]: value } : e) })),
   updateEducationBullet: (id, idx, v) => set(s => upd(s, { ...s.resume, education: s.resume.education.map(e => { if (e.id !== id) return e; const bullets = [...e.bullets]; bullets[idx] = v; return { ...e, bullets }; }) })),
   addEducationBullet: (id) => set(s => upd(s, { ...s.resume, education: s.resume.education.map(e => e.id === id ? { ...e, bullets: [...e.bullets, 'New bullet'] } : e) })),
   removeEducationBullet: (id, idx) => set(s => upd(s, { ...s.resume, education: s.resume.education.map(e => e.id !== id ? e : { ...e, bullets: e.bullets.filter((_, i) => i !== idx) }) })),
   removeEducation: (id) => set(s => upd(s, { ...s.resume, education: s.resume.education.filter(e => e.id !== id) })),
 
   // Experience
-  addExperience: () => set(s => updDirty(s, { ...s.resume, experience: [...s.resume.experience, { id: nanoid(), company: 'Company Name', location: 'City, State', title: 'Job Title', startDate: 'Jan 2022', endDate: 'Present', link: '', bullets: ['Describe your key achievement with metrics'] }] })),
-  updateExperience: (id, field, value) => set(s => updDirty(s, { ...s.resume, experience: s.resume.experience.map(e => e.id === id ? { ...e, [field]: value } : e) })),
+  addExperience: () => set(s => upd(s, { ...s.resume, experience: [...s.resume.experience, { id: nanoid(), company: 'Company Name', location: 'City, State', title: 'Job Title', startDate: 'Jan 2022', endDate: 'Present', link: '', bullets: ['Describe your key achievement with metrics'] }] })),
+  updateExperience: (id, field, value) => set(s => upd(s, { ...s.resume, experience: s.resume.experience.map(e => e.id === id ? { ...e, [field]: value } : e) })),
   updateExperienceBullet: (id, idx, v) => set(s => upd(s, { ...s.resume, experience: s.resume.experience.map(e => { if (e.id !== id) return e; const bullets = [...e.bullets]; bullets[idx] = v; return { ...e, bullets }; }) })),
   addExperienceBullet: (id) => set(s => upd(s, { ...s.resume, experience: s.resume.experience.map(e => e.id === id ? { ...e, bullets: [...e.bullets, 'New bullet point'] } : e) })),
   removeExperienceBullet: (id, idx) => set(s => upd(s, { ...s.resume, experience: s.resume.experience.map(e => e.id !== id ? e : { ...e, bullets: e.bullets.filter((_, i) => i !== idx) }) })),
@@ -289,14 +302,14 @@ export const useResumeStore = create<ResumeStore>((set) => ({
       sections: s.resume.sections.filter(sec => sec.id !== id),
       ...(isCustom ? { customSections: s.resume.customSections.filter(cs => cs.id !== id) } : {}),
     };
-    return withHistory(s, newResume, false);
+    return withHistory(s, newResume, true);
   }),
 
   restoreSection: (id) => set(s => {
     if (s.resume.sections.some(sec => sec.id === id)) return {};
     const config = DEFAULT_SECTION_CONFIGS[id];
     if (!config) return {};
-    return withHistory(s, { ...s.resume, sections: [...s.resume.sections, config] }, false);
+    return withHistory(s, { ...s.resume, sections: [...s.resume.sections, config] }, true);
   }),
 
   setIsPrinting: (v) => set({ isPrinting: v }),
@@ -308,12 +321,12 @@ export const useResumeStore = create<ResumeStore>((set) => ({
   },
 
   loadFromData: (data, markDirty = false) => {
-    const pi = data.personalInfo as PersonalInfo & Record<string, unknown>;
-    if (pi.showPhoto === undefined) pi.showPhoto = true;
-    data.education = data.education.map(e => ({ link: '', ...e }));
-    data.experience = data.experience.map(e => ({ link: '', ...e }));
-    save(data);
-    set({ resume: data, lastSaved: new Date(), isDirty: markDirty, history: [], future: [] });
+    const d = structuredClone(data) as ResumeData & { personalInfo: PersonalInfo & Record<string, unknown> };
+    if (d.personalInfo.showPhoto === undefined) d.personalInfo.showPhoto = true;
+    d.education = d.education.map(e => ({ link: '', ...e }));
+    d.experience = d.experience.map(e => ({ link: '', ...e }));
+    save(d);
+    set({ resume: d, lastSaved: new Date(), isDirty: markDirty, history: [], future: [] });
   },
 
   undo: () => set(s => {

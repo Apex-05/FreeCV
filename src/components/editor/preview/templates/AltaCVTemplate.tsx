@@ -37,7 +37,7 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
       <h3 style={{ fontSize: fs + 1 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#1a202c', margin: '0 0 8px', paddingBottom: 4, borderBottom: `1.5px solid ${acc}` }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-          : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+          : <span>{lbl}</span>}
       </h3>
     );
   };
@@ -47,7 +47,7 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
       <h2 style={{ fontSize: fs + 3 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a202c', margin: '0 0 8px', paddingBottom: 5, borderBottom: `2px solid ${acc}` }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-          : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+          : <span>{lbl}</span>}
       </h2>
     );
   };

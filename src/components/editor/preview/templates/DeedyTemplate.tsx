@@ -38,7 +38,7 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
       <h3 style={{ fontSize: fs + 1 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff', background: acc, margin: '12px 0 6px', padding: '3px 8px', borderRadius: 2 }}>
         {!isPrinting && id
           ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline', color: '#fff' }} />
-          : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+          : <span>{lbl}</span>}
       </h3>
     );
   };
@@ -49,7 +49,7 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
         <h2 style={{ fontSize: fs + 4 + 'px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a202c', margin: 0, borderBottom: `3px solid ${acc}`, paddingBottom: 3 }}>
           {!isPrinting && id
             ? <EditableField value={lbl} onChange={v => store.updateSection(id, { label: v })} style={{ display: 'inline' }} />
-            : <span dangerouslySetInnerHTML={{ __html: lbl }} />}
+            : <span>{lbl}</span>}
         </h2>
       </div>
     );

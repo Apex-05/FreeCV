@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { useResumeStore } from '../../../store/resumeStore';
 import { AwesomeCVTemplate } from './templates/AwesomeCVTemplate';
 import { JakeTemplate } from './templates/JakeTemplate';
@@ -11,8 +11,6 @@ import { HipsterTemplate } from './templates/HipsterTemplate';
 import { ModernCVTemplate } from './templates/ModernCVTemplate';
 import { AltaCVTemplate } from './templates/AltaCVTemplate';
 import type { ResumeData } from '../../../types/resume';
-
-const PAGE_HEIGHT_PX = 1056; // US Letter at 96dpi
 
 // Stable map outside component — prevents new component type on every render
 const TEMPLATE_MAP: Record<string, React.ComponentType<{ data: ResumeData; isPrinting: boolean }>> = {
@@ -35,18 +33,6 @@ export const ResumePreview: React.FC = () => {
 
   const { template, sideMargin } = resume.settings;
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(1);
-
-  useEffect(() => {
-    const el = canvasRef.current;
-    if (!el) return;
-    const obs = new ResizeObserver(() => {
-      const h = el.scrollHeight;
-      setPageCount(Math.max(1, Math.ceil(h / PAGE_HEIGHT_PX)));
-    });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   const TemplateComponent = TEMPLATE_MAP[template] ?? AwesomeCVTemplate;
   const sm = sideMargin ?? 0;

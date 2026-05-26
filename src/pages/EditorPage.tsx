@@ -12,6 +12,10 @@ import toast from 'react-hot-toast';
 
 const STORAGE_INFO_KEY = 'freecv_storage_info_shown';
 
+const PREVIEW_INITIAL    = { opacity: 0, y: 16 };
+const PREVIEW_ANIMATE    = { opacity: 1, y: 0 };
+const PREVIEW_TRANSITION = { duration: 0.4, ease: 'easeOut' };
+
 const EditorPageInner: React.FC = () => {
   const { isPrinting, resume } = useResumeStore();
   const { triggerAutoSave, checkCrashRecovery } = useSaveStore();
@@ -29,7 +33,17 @@ const EditorPageInner: React.FC = () => {
 
   // ── Multi-tab conflict detection ───────────────────────────────────────────
   useEffect(() => {
+    const TOAST_ID = 'freecv-external-update';
+    const COOLDOWN_MS = 60_000;
+    let lastShownAt = 0;
+
     const handler = () => {
+      const now = Date.now();
+      if (now - lastShownAt < COOLDOWN_MS) return; // already showing / shown recently
+      lastShownAt = now;
+
+      // Use a fixed ID so react-hot-toast replaces the existing toast
+      // instead of stacking a new one on top
       toast(
         t => (
           <div className="flex flex-col gap-1">
@@ -42,17 +56,27 @@ const EditorPageInner: React.FC = () => {
               >
                 Reload
               </button>
-              <button onClick={() => toast.dismiss(t.id)} className="text-xs text-gray-400 hover:text-gray-600">
+              <button onClick={() => { toast.dismiss(t.id); lastShownAt = 0; }} className="text-xs text-gray-400 hover:text-gray-600">
                 Dismiss
               </button>
             </div>
           </div>
         ),
-        { duration: 12000, icon: '⚠️' },
+        { id: TOAST_ID, duration: 12000, icon: '⚠️' },
       );
     };
     window.addEventListener('freecv:external-update', handler);
     return () => window.removeEventListener('freecv:external-update', handler);
+  }, []);
+
+  // ── Storage quota warning ──────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = () => toast(
+      '⚠️ Storage almost full — your profile photo was removed from the save to free space. Export a JSON backup to preserve it.',
+      { duration: 10000, style: { maxWidth: 420, fontSize: 13 } },
+    );
+    window.addEventListener('freecv:quota-exceeded', handler);
+    return () => window.removeEventListener('freecv:quota-exceeded', handler);
   }, []);
 
   // ── Global undo/redo keyboard shortcuts ────────────────────────────────────
@@ -61,12 +85,12 @@ const EditorPageInner: React.FC = () => {
     if (target.isContentEditable || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
     if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
       e.preventDefault();
-      useResumeStore.getState().undo();
-      toast('Undone', { duration: 1000, icon: '✅' });
+      const s = useResumeStore.getState();
+      if (s.history.length > 0) { s.undo(); toast('Undone', { duration: 1000, icon: '✅' }); }
     } else if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
       e.preventDefault();
-      useResumeStore.getState().redo();
-      toast('Redone', { duration: 1000, icon: '✅' });
+      const s = useResumeStore.getState();
+      if (s.future.length > 0) { s.redo(); toast('Redone', { duration: 1000, icon: '✅' }); }
     }
   }, []);
 
@@ -78,13 +102,14 @@ const EditorPageInner: React.FC = () => {
   // ── First-visit info toast ─────────────────────────────────────────────────
   useEffect(() => {
     if (!localStorage.getItem(STORAGE_INFO_KEY)) {
-      setTimeout(() => {
+      const id = setTimeout(() => {
         toast(
           '💾 Auto-saves every 5s. Use "Save" to create named versions, or "History" tab to restore them.',
           { duration: 8000, style: { maxWidth: 400, fontSize: 13 } },
         );
         localStorage.setItem(STORAGE_INFO_KEY, '1');
       }, 2500);
+      return () => clearTimeout(id);
     }
   }, []);
 
@@ -113,7 +138,7 @@ const EditorPageInner: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {!isPrinting && <Sidebar />}
         <main className="flex-1 overflow-auto bg-gray-100 flex items-start justify-center py-8 px-4">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: 'easeOut' }}>
+          <motion.div initial={PREVIEW_INITIAL} animate={PREVIEW_ANIMATE} transition={PREVIEW_TRANSITION}>
             <ResumePreview />
           </motion.div>
         </main>

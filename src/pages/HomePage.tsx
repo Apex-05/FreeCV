@@ -6,7 +6,6 @@ import { templateConfigs } from '../data/templateConfigs';
 import type { TemplateConfig, TemplateId } from '../types/resume';
 import { useResumeStore } from '../store/resumeStore';
 import { usePDFEditorStore } from '../store/pdfEditorStore';
-import { parseDocx, parseText } from '../utils/resumeParser';
 import toast from 'react-hot-toast';
 
 // ─── Template mini-previews ────────────────────────────────────────────────────
@@ -517,13 +516,14 @@ const DotsBackground: React.FC = React.memo(() => {
     };
     const onLeave = () => { mouseRef.current = { x: -9999, y: -9999 }; };
 
-    window.addEventListener('mousemove', onMove);
+    // Scope to canvas only — no need to track mouse outside the hero section
+    canvas.addEventListener('mousemove', onMove);
     canvas.addEventListener('mouseleave', onLeave);
     window.addEventListener('resize', resize);
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener('mousemove', onMove);
+      canvas.removeEventListener('mousemove', onMove);
       canvas.removeEventListener('mouseleave', onLeave);
       window.removeEventListener('resize', resize);
     };
@@ -593,12 +593,12 @@ const FEATURES = [
   { icon: Sparkles, color: '#8b5cf6', title: '10 pro templates',       desc: 'Carefully crafted templates for every industry and career level.' },
   { icon: Users,    color: '#f43f5e', title: 'ATS-friendly formats',   desc: "Jake's Resume and ModernCV are optimised to pass ATS screening systems." },
   { icon: Upload,   color: '#6366f1', title: 'Perfect PDF export',     desc: 'Download a pixel-perfect PDF that looks exactly like your preview.' },
-  { icon: Download, color: '#14b8a6', title: 'Import existing resume', desc: 'Upload a PDF, .docx, or .txt file and we\'ll parse it into the editor automatically.' },
+  { icon: Download, color: '#14b8a6', title: 'PDF text editor',        desc: 'Upload a PDF to edit it directly as text. Opens in the built-in PDF editor — no re-formatting needed.' },
 ];
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { setTemplate, loadFromData } = useResumeStore();
+  const { setTemplate } = useResumeStore();
   const { setPdfFile } = usePDFEditorStore();
   const [filter, setFilter] = useState<string>('all');
   const featuresRef = useRef<HTMLDivElement>(null);
@@ -612,29 +612,16 @@ export const HomePage: React.FC = () => {
     navigate('/editor');
   };
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (importRef.current) importRef.current.value = '';
-
-    // PDFs → PDF Direct Editor
-    if (file.name.toLowerCase().endsWith('.pdf')) {
-      setPdfFile(file);
-      navigate('/pdf-editor');
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('File must be under 20 MB.');
       return;
     }
-
-    const toastId = toast.loading('Parsing your resume...');
-    try {
-      let result;
-      if (file.name.endsWith('.docx')) result = await parseDocx(file);
-      else { const text = await file.text(); result = parseText(text); }
-      loadFromData(result.data);
-      toast.success('Resume imported! Edit and download.', { id: toastId });
-      navigate('/editor');
-    } catch {
-      toast.error('Import failed. Try a .docx or plain text file.', { id: toastId });
-    }
+    setPdfFile(file);
+    navigate('/pdf-editor');
   };
 
   const categories = ['all', 'professional', 'creative', 'academic'];
@@ -706,7 +693,7 @@ export const HomePage: React.FC = () => {
                 Choose a Template <ArrowRight size={16} />
               </button>
               <div>
-                <input ref={importRef} type="file" accept=".docx,.txt,.pdf" onChange={handleImport} style={{ display: 'none' }} />
+                <input ref={importRef} type="file" accept=".pdf" onChange={handleImport} style={{ display: 'none' }} />
                 <button onClick={() => importRef.current?.click()}
                   className="flex items-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base">
                   <Upload size={16} /> Import My Resume
