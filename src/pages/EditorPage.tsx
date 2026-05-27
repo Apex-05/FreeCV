@@ -10,6 +10,7 @@ import { UnsavedGuardProvider } from '../components/editor/UnsavedModal';
 import { useResumeStore } from '../store/resumeStore';
 import { useSaveStore } from '../store/saveStore';
 import toast from 'react-hot-toast';
+import { CloudCheck, X } from 'lucide-react';
 
 const STORAGE_INFO_KEY = 'freecv_storage_info_shown';
 
@@ -104,10 +105,29 @@ const EditorPageInner: React.FC = () => {
   useEffect(() => {
     if (!localStorage.getItem(STORAGE_INFO_KEY)) {
       const id = setTimeout(() => {
-        toast(
-          '💾 Auto-saves every 5s. Use "Save" to create named versions, or "History" tab to restore them.',
-          { duration: 8000, style: { maxWidth: 400, fontSize: 13 } },
-        );
+        toast(t => (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, maxWidth: 320 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(99,102,241,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+              <CloudCheck size={16} style={{ color: '#a5b4fc' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontWeight: 600, fontSize: 13, color: '#f9fafb', lineHeight: 1.3 }}>Auto-save is on</p>
+              <p style={{ margin: '5px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.55 }}>
+                Saves every 5 seconds. Use{' '}
+                <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Save</span>
+                {' '}for named versions, or the{' '}
+                <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>History</span>
+                {' '}tab to restore any point.
+              </p>
+            </div>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(255,255,255,0.28)', flexShrink: 0, lineHeight: 1, marginTop: 2 }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ), { duration: 10000, style: { padding: '12px 14px', maxWidth: 380 } });
         localStorage.setItem(STORAGE_INFO_KEY, '1');
       }, 2500);
       return () => clearTimeout(id);
