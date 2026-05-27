@@ -323,8 +323,8 @@ export const useResumeStore = create<ResumeStore>((set) => ({
   loadFromData: (data, markDirty = false) => {
     const d = structuredClone(data) as ResumeData & { personalInfo: PersonalInfo & Record<string, unknown> };
     if (d.personalInfo.showPhoto === undefined) d.personalInfo.showPhoto = true;
-    d.education = d.education.map(e => ({ link: '', ...e }));
-    d.experience = d.experience.map(e => ({ link: '', ...e }));
+    d.education = d.education.map(e => ({ ...e, link: e.link ?? '' }));
+    d.experience = d.experience.map(e => ({ ...e, link: e.link ?? '' }));
     save(d);
     set({ resume: d, lastSaved: new Date(), isDirty: markDirty, history: [], future: [] });
   },

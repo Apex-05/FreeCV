@@ -14,7 +14,6 @@ interface Props { data: ResumeData; isPrinting: boolean }
 export const SB2NovTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   const store = useResumeStore.getState();
   const { settings, personalInfo, sections } = data;
-  const visible = (id: string) => sections.some(s => s.id === id && s.visible !== false);
   const acc = settings.accentColor;
   const fs = settings.fontSize;
   const gap: React.CSSProperties = { marginTop: settings.sectionSpacing * 3 + 8 + 'px' };

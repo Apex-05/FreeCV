@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useResumeStore } from '../../../store/resumeStore';
 import { templateConfigs } from '../../../data/templateConfigs';
 import type { TemplateId } from '../../../types/resume';
-import { Check, Type, AlignJustify, Rows, Layout, Palette, Layers, Image, Circle, Square, List } from 'lucide-react';
+import { Check, Type, AlignJustify, Rows, Layout, Palette, Layers, Image, List } from 'lucide-react';
 
 const ACCENT_COLORS = [
   { hex: '#6366f1', name: 'Indigo' }, { hex: '#8b5cf6', name: 'Violet' },

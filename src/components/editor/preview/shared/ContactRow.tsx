@@ -15,7 +15,7 @@ interface ContactRowProps {
 }
 
 export const ContactRow: React.FC<ContactRowProps> = ({
-  accent, fontSize, isPrinting, style, iconColor, separator = '|', layout = 'row',
+  accent, fontSize, style, iconColor, separator = '|', layout = 'row',
 }) => {
   const { resume, updateContactLink } = useResumeStore();
   const visibleLinks = resume.personalInfo.contactLinks.filter(l => l.visible && l.value.trim());

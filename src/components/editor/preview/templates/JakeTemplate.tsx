@@ -15,7 +15,6 @@ interface Props { data: ResumeData; isPrinting: boolean }
 export const JakeTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   const store = useResumeStore.getState();
   const { settings, personalInfo, sections } = data;
-  const visible = (id: string) => sections.some(s => s.id === id && s.visible !== false);
   const fs = settings.fontSize;
   const gap: React.CSSProperties = { marginTop: settings.sectionSpacing * 3 + 6 + 'px' };
 

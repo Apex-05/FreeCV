@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RotateCcw, RotateCw, ZoomIn, ZoomOut, Crop, Check, Maximize2 } from 'lucide-react';
+import { X, RotateCcw, RotateCw, ZoomIn, Crop, Check, Maximize2 } from 'lucide-react';
 import { useResumeStore } from '../../store/resumeStore';
 
 interface Props { onClose: () => void }

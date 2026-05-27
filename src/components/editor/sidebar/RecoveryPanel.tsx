@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { History, RotateCcw, Trash2, Check, Clock3, FilePlus2, FileClock, ShieldCheck, AlertOctagon, ChevronRight, Database } from 'lucide-react';
+import { RotateCcw, Trash2, Check, Clock3, FilePlus2, FileClock, ShieldCheck, AlertOctagon, Database } from 'lucide-react';
 import { useSaveStore } from '../../../store/saveStore';
 import { useResumeStore } from '../../../store/resumeStore';
 import type { VersionMeta, VersionSource } from '../../../utils/db';
@@ -159,7 +159,7 @@ const SOURCE_GROUP_LABELS: Record<VersionSource, string> = {
 
 export const RecoveryPanel: React.FC = () => {
   const { versions, loadVersions, restoreVersion, deleteVersion, renameVersion, idbAvailable, hasRecovery, dismissRecovery } = useSaveStore();
-  const { loadFromData, resume } = useResumeStore();
+  const { loadFromData } = useResumeStore();
   const [restoring, setRestoring] = useState<string | null>(null);
   const [filter, setFilter] = useState<VersionSource | 'all'>('all');
 

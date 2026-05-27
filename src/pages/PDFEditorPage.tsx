@@ -481,7 +481,7 @@ export const PDFEditorPage: React.FC = () => {
         canvas.height = cssH * dpr;
         const ctx = canvas.getContext('2d')!;
         ctx.scale(dpr, dpr);
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport, canvas }).promise;
         const canvasDataUrl = canvas.toDataURL('image/png');
         // Release canvas backing store immediately after data URL is captured
         canvas.width = 0; canvas.height = 0;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import type { Transition } from 'framer-motion';
 import { TopBar } from '../components/editor/TopBar';
 import { Sidebar } from '../components/editor/Sidebar';
 import { ResumePreview } from '../components/editor/preview/ResumePreview';
@@ -14,7 +15,7 @@ const STORAGE_INFO_KEY = 'freecv_storage_info_shown';
 
 const PREVIEW_INITIAL    = { opacity: 0, y: 16 };
 const PREVIEW_ANIMATE    = { opacity: 1, y: 0 };
-const PREVIEW_TRANSITION = { duration: 0.4, ease: 'easeOut' };
+const PREVIEW_TRANSITION: Transition = { duration: 0.4, ease: 'easeOut' };
 
 const EditorPageInner: React.FC = () => {
   const { isPrinting, resume } = useResumeStore();

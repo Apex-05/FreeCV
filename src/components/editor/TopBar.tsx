@@ -55,7 +55,7 @@ export const TopBar: React.FC = () => {
   const navigate = useNavigate();
   const { guardAsync } = useUnsavedGuard();
 
-  const { lastSaved, isPrinting, isPreviewMode, isDirty, history, future,
+  const { lastSaved, isPreviewMode, isDirty, history, future,
           resetResume, setPreviewMode, undo, redo, clearDirty } = useResumeStore();
   const { status: saveStatus, manualSave } = useSaveStore();
   const { setPdfFile } = usePDFEditorStore();

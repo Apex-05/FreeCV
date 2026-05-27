@@ -85,8 +85,8 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
           onClick={e => e.stopPropagation()}
         >
           <div className="grid gap-0.5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-            {POSITIONS.map((row, ri) =>
-              row.map((pos, ci) => (
+            {POSITIONS.map((row) =>
+              row.map((pos) => (
                 <button
                   key={pos}
                   onClick={() => { updateSettings({ photoPosition: pos }); setRepositioning(false); }}
