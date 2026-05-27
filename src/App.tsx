@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { HomePage } from './pages/HomePage';
 import { EditorPage } from './pages/EditorPage';
 import { PDFEditorPage } from './pages/PDFEditorPage';
+import { MobileWarning } from './components/MobileWarning';
 
 // ── Global error boundary ─────────────────────────────────────────────────────
 interface EBState { error: Error | null }
@@ -41,6 +42,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode; label?:
 function App() {
   return (
     <ErrorBoundary label="root">
+      <MobileWarning />
       <BrowserRouter>
         <Toaster position="bottom-center" toastOptions={{ style: { background: '#1f2937', color: '#fff', fontSize: 14, borderRadius: 12, padding: '10px 16px' }, success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } } }} />
         <Routes>
