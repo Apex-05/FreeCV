@@ -27,12 +27,6 @@ export function MobileWarning() {
             FreeCV is designed for laptop and desktop browsers. Please switch to a larger screen for the best experience.
           </p>
         </div>
-        <button
-          onClick={() => setVisible(false)}
-          className="w-full py-2.5 px-6 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
-        >
-          Continue Anyway
-        </button>
       </div>
     </div>
   );
