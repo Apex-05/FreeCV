@@ -101,7 +101,7 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                   <EditableField value={edu.degree} onChange={v => store.updateEducation(edu.id, 'degree', v)} style={{ fontStyle: 'italic', fontSize: fs - 1 + 'px', color: '#4a5568', display: 'block' }} />
                   <div style={{ fontSize: fs - 1.5 + 'px', color: '#718096' }}>
                     <EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', r.join('').trim()); }} />
-                    {edu.location && <><span> · </span><EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} /></>}
+                    {edu.location && <span> · </span>}<EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} />
                   </div>
                   {edu.gpa && <div style={{ fontSize: fs - 1.5 + 'px', color: acc }}>GPA: <EditableField value={edu.gpa} onChange={v => store.updateEducation(edu.id, 'gpa', v)} /></div>}
                 </div>
@@ -137,8 +137,8 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                     <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600, fontSize: fs - 0.5 + 'px', color: '#1a202c' }} />
                     <Del onClick={() => store.removeCertification(c.id)} />
                   </div>
-                  {c.issuer && <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096', display: 'block' }} />}
-                  {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1.5 + 'px', color: acc }} />}
+                  <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096', display: 'block' }} />
+                  <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1.5 + 'px', color: acc }} />
                 </div>
               ))}
               <Add onClick={() => store.addCertification()} label="+ Add award" />
@@ -171,7 +171,7 @@ export const DeedyTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <div style={{ textAlign: 'right', fontSize: fs - 1 + 'px', color: '#718096' }}>
                             <EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} />
-                            {exp.location && <div><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>}
+                            <div><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>
                           </div>
                           <Del onClick={() => store.removeExperience(exp.id)} />
                         </div>

@@ -36,7 +36,7 @@ function sanitize(html: string): string {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   sanitizeNode(tmp);
-  return tmp.innerHTML.replace(/<(b|i|u|s|sub|sup)><\/\1>/g, '');
+  return tmp.innerHTML.replace(/<(b|i|u|s|sub|sup)><\/\1>/g, '').replace(/&nbsp;/g, ' ').replace(/ /g, ' ');
 }
 
 // ─── EditableField ─────────────────────────────────────────────────────────────
@@ -65,18 +65,10 @@ export const EditableField: React.FC<EditableFieldProps> = ({
     }
   }, [value, editing]);
 
-  // Move cursor to end when editing starts
+  // Focus the field when editing starts; let the browser preserve the click position
   useEffect(() => {
     if (!editing || !ref.current) return;
     ref.current.focus({ preventScroll: true });
-    try {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(ref.current);
-      range.collapse(false);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-    } catch { /* noop */ }
   }, [editing]);
 
   const startEdit = () => { if (!editing) setEditing(true); };

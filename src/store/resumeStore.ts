@@ -58,10 +58,26 @@ function migrate(raw: Record<string, unknown>): ResumeData {
     if (p.showPhoto === undefined) p.showPhoto = true;
   }
   if (Array.isArray(raw.education)) {
-    raw.education = (raw.education as Record<string, unknown>[]).map(e => ({ link: '', ...e }));
-  }
+    raw.education = (raw.education as Record<string, unknown>[]).map(e => ({ link: '', bullets: [], ...e }));
+  } else if (!raw.education) { raw.education = []; }
   if (Array.isArray(raw.experience)) {
-    raw.experience = (raw.experience as Record<string, unknown>[]).map(e => ({ link: '', ...e }));
+    raw.experience = (raw.experience as Record<string, unknown>[]).map(e => ({ link: '', bullets: [], ...e }));
+  } else if (!raw.experience) { raw.experience = []; }
+  if (Array.isArray(raw.projects)) {
+    raw.projects = (raw.projects as Record<string, unknown>[]).map(p => ({ link: '', bullets: [], ...p }));
+  } else if (!raw.projects) { raw.projects = []; }
+  if (!Array.isArray(raw.skills)) raw.skills = [];
+  if (!Array.isArray(raw.certifications)) raw.certifications = [];
+  if (typeof raw.summary !== 'string') raw.summary = '';
+  if (!Array.isArray(raw.sections)) {
+    raw.sections = [
+      { id: 'summary',        type: 'summary',        label: 'Summary',        visible: true },
+      { id: 'education',      type: 'education',      label: 'Education',      visible: true },
+      { id: 'experience',     type: 'experience',     label: 'Experience',     visible: true },
+      { id: 'projects',       type: 'projects',       label: 'Projects',       visible: true },
+      { id: 'skills',         type: 'skills',         label: 'Skills',         visible: true },
+      { id: 'certifications', type: 'certifications', label: 'Certifications', visible: true },
+    ];
   }
   return raw as unknown as ResumeData;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -45,6 +45,16 @@ function SortableLink({ link, onUpdate, onRemove }: {
   const Icon = CONTACT_ICONS[link.type];
   const color = CONTACT_COLORS[link.type];
   const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(link.value);
+  const [draftLabel, setDraftLabel] = useState(link.label ?? '');
+
+  // Keep drafts in sync with external changes (undo/redo) when not editing
+  useEffect(() => { if (!editing) setDraft(link.value); }, [link.value, editing]);
+  useEffect(() => { setDraftLabel(link.label ?? ''); }, [link.label]);
+
+  const commitEdit = () => { onUpdate({ value: draft }); setEditing(false); };
+  const cancelEdit = () => { setDraft(link.value); setEditing(false); };
+  const openEdit  = () => { setDraft(link.value); setEditing(true); };
 
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
@@ -59,21 +69,23 @@ function SortableLink({ link, onUpdate, onRemove }: {
         <div className="flex-1 min-w-0">
           <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider leading-none mb-1">{CONTACT_LABELS[link.type]}</div>
           {editing ? (
-            <input autoFocus value={link.value}
-              onChange={e => onUpdate({ value: e.target.value })}
-              onBlur={() => setEditing(false)}
-              onKeyDown={e => e.key === 'Enter' && setEditing(false)}
+            <input autoFocus value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit(); }}
               className="w-full text-xs border border-indigo-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             />
           ) : (
-            <div onClick={() => setEditing(true)}
+            <div onClick={openEdit}
               className="text-xs text-gray-700 truncate cursor-text hover:text-indigo-600 transition-colors"
               title={link.value}>
               {link.value || <span className="text-gray-300 italic">Click to set value</span>}
             </div>
           )}
           {link.type === 'custom' && (
-            <input value={link.label || ''} onChange={e => onUpdate({ label: e.target.value })}
+            <input value={draftLabel} onChange={e => setDraftLabel(e.target.value)}
+              onBlur={() => onUpdate({ label: draftLabel })}
+              onKeyDown={e => { if (e.key === 'Enter') { onUpdate({ label: draftLabel }); (e.target as HTMLInputElement).blur(); } if (e.key === 'Escape') { setDraftLabel(link.label ?? ''); (e.target as HTMLInputElement).blur(); } }}
               placeholder="Display label"
               className="w-full text-[10px] text-gray-500 border-none outline-none mt-0.5 bg-transparent" />
           )}
@@ -93,7 +105,7 @@ function SortableLink({ link, onUpdate, onRemove }: {
 }
 
 export const ContactPanel: React.FC = () => {
-  const { resume, updatePersonalInfo, updateSettings, addContactLink, updateContactLink, removeContactLink, reorderContactLinks } = useResumeStore();
+  const { resume, updatePersonalInfo, updateSettings, updateSettingsLive, addContactLink, updateContactLink, removeContactLink, reorderContactLinks } = useResumeStore();
   const { personalInfo } = resume;
   const photoSize = resume.settings.photoSize ?? 100;
   const showPhoto = personalInfo.showPhoto !== false;
@@ -114,6 +126,11 @@ export const ContactPanel: React.FC = () => {
   const photoRef = React.useRef<HTMLInputElement>(null);
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
+    if (!f.type.startsWith('image/') && !/\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)) {
+      toast.error('Please select an image file.');
+      e.target.value = '';
+      return;
+    }
     if (f.size > 5 * 1024 * 1024) {
       toast.error('Photo must be under 5 MB.');
       e.target.value = '';
@@ -180,7 +197,10 @@ export const ContactPanel: React.FC = () => {
             <div className="slider-wrap">
               <input
                 type="range" min={40} max={120} step={5} value={photoSize}
-                onChange={e => updateSettings({ photoSize: parseInt(e.target.value, 10) })}
+                onChange={e => updateSettingsLive({ photoSize: parseInt(e.target.value, 10) })}
+                onMouseUp={e => updateSettings({ photoSize: parseInt((e.target as HTMLInputElement).value, 10) })}
+                onTouchEnd={e => updateSettings({ photoSize: parseInt((e.target as HTMLInputElement).value, 10) })}
+                onBlur={e => updateSettings({ photoSize: parseInt((e.target as HTMLInputElement).value, 10) })}
                 style={{ '--pct': ((photoSize - 40) / (120 - 40)) * 100 + '%' } as React.CSSProperties}
                 className="w-full"
               />

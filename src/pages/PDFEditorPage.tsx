@@ -318,6 +318,8 @@ const SnapshotCard: React.FC<{
   const [confirmRestore, setConfirmRestore] = useState(false);
   const [confirmDel, setConfirmDel]     = useState(false);
 
+  useEffect(() => { if (!editing) setLabel(snap.label); }, [snap.label, editing]);
+
   const diff = Date.now() - snap.timestamp;
   const timeStr = diff < 60_000 ? 'Just now'
     : diff < 3_600_000 ? `${Math.floor(diff / 60_000)}m ago`
@@ -417,10 +419,13 @@ export const PDFEditorPage: React.FC = () => {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
+      if (!e.ctrlKey) return;
       const t = e.target as HTMLElement;
-      if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
-      if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); undoRef.current(); }
-      if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redoRef.current(); }
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+      if (t.isContentEditable) t.blur();
+      const key = e.key.toLowerCase();
+      if (!e.shiftKey && key === 'z') { e.preventDefault(); undoRef.current(); }
+      else if (key === 'y' || (e.shiftKey && key === 'z')) { e.preventDefault(); redoRef.current(); }
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -585,7 +590,7 @@ export const PDFEditorPage: React.FC = () => {
   }, [pages]);
 
   const handleReset = () => {
-    setUndoStack(s => [...s, editedRef.current]);
+    setUndoStack(s => [...s.slice(-49), editedRef.current]);
     setRedoStack([]);
     setEditedTexts({});
   };

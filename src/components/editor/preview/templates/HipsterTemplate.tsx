@@ -127,7 +127,7 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
           <div>
             <h3 style={{ fontSize: fs - 1 + 'px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Skills</h3>
             {data.skills.map(sk => {
-              const tags = sk.skills.split(/[,;]/).map(s => s.trim()).filter(Boolean);
+              const tags = sk.skills.split(/[,;]/).map(s => s.replace(/&nbsp;/g, ' ').replace(/ /g, ' ').trim()).filter(Boolean);
               return (
                 <div key={sk.id} className="group" style={{ marginBottom: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
@@ -194,7 +194,7 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                         <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontWeight: 800, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                           <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 600, color: acc }} />
-                          {exp.location && <><span style={{ color: '#a0aec0' }}>·</span><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096' }} /></>}
+                          {exp.location && <span style={{ color: '#a0aec0' }}>·</span>}<EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096' }} />
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -226,10 +226,10 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                         {(proj.technologies || !isPrinting) && (
                           <div style={{ marginTop: 3 }}>
                             {proj.technologies.split(/[,;]/).map((t, i) => {
-                              const tag = t.trim();
+                              const tag = t.replace(/&nbsp;/g, ' ').replace(/\xa0/g, ' ').trim();
                               return tag ? (
                                 <Tag key={i} text={tag} onRemove={() => {
-                                  const tags = proj.technologies.split(/[,;]/).map(s => s.trim()).filter((_, j) => j !== i);
+                                  const tags = proj.technologies.split(/[,;]/).map(s => s.replace(/&nbsp;/g, ' ').replace(/\xa0/g, ' ').trim()).filter((_, j) => j !== i);
                                   store.updateProject(proj.id, 'technologies', tags.join(', '));
                                 }} />
                               ) : null;
@@ -263,7 +263,7 @@ export const HipsterTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                   {data.certifications.map(c => (
                     <div key={c.id} className="group" style={{ background: acc + '10', border: `1px solid ${acc}30`, borderRadius: 8, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600, fontSize: fs - 0.5 + 'px' }} />
-                      {c.date && <span style={{ color: '#a0aec0', fontSize: fs - 2 + 'px' }}>{c.date}</span>}
+                      {c.date !== undefined && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ color: '#a0aec0', fontSize: fs - 2 + 'px' }} />}
                       <Del onClick={() => store.removeCertification(c.id)} />
                     </div>
                   ))}

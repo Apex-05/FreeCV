@@ -15,7 +15,7 @@ interface ContactRowProps {
 }
 
 export const ContactRow: React.FC<ContactRowProps> = ({
-  accent, fontSize, style, iconColor, separator = '|', layout = 'row',
+  accent, fontSize, isPrinting, style, iconColor, separator = '|', layout = 'row',
 }) => {
   const { resume, updateContactLink } = useResumeStore();
   const visibleLinks = resume.personalInfo.contactLinks.filter(l => l.visible && l.value.trim());
@@ -28,11 +28,13 @@ export const ContactRow: React.FC<ContactRowProps> = ({
     return (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
         <Icon size={Math.max(9, fontSize - 2)} style={{ color: ic, flexShrink: 0 }} />
-        <EditableField
-          value={link.value}
-          onChange={v => updateContactLink(link.id, { value: v })}
-          style={{ color: style?.color ?? '#374151' }}
-        />
+        {isPrinting
+          ? <span style={{ color: style?.color ?? '#374151' }}>{link.value}</span>
+          : <EditableField
+              value={link.value}
+              onChange={v => updateContactLink(link.id, { value: v })}
+              style={{ color: style?.color ?? '#374151' }}
+            />}
       </span>
     );
   };

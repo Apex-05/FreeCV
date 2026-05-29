@@ -6,7 +6,7 @@ import { useResumeStore } from '../../store/resumeStore';
 interface Props { onClose: () => void }
 
 export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
-  const { resume, updatePersonalInfo } = useResumeStore();
+  const { resume, updatePersonalInfo, updateSettings } = useResumeStore();
   const src = resume.personalInfo.photo;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,7 +16,7 @@ export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 });
-  const [cropShape, setCropShape] = useState<'circle' | 'square' | 'rounded'>('circle');
+  const [cropShape, setCropShape] = useState<'circle' | 'square' | 'rounded'>(resume.settings.photoShape ?? 'circle');
   const imageRef = useRef<HTMLImageElement | null>(null);
   const CANVAS_SIZE = 320;
 
@@ -110,10 +110,18 @@ export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
   };
   const handleMouseUp = () => setDragging(false);
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    setZoom(z => Math.max(0.1, Math.min(5, z - e.deltaY * 0.001)));
-  };
+  // Non-passive wheel listener — React 17+ makes onWheel passive by default,
+  // which silently ignores preventDefault and lets the page scroll while zooming.
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      setZoom(z => Math.max(0.1, Math.min(5, z - e.deltaY * 0.001)));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
 
   const fitToFrame = () => {
     const fit = Math.min(CANVAS_SIZE / imgSize.w, CANVAS_SIZE / imgSize.h);
@@ -128,16 +136,39 @@ export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
   };
 
   const apply = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    // Export without the border indicator
+    const img = imageRef.current;
+    if (!img) return;
     const output = document.createElement('canvas');
     output.width = CANVAS_SIZE;
     output.height = CANVAS_SIZE;
-    const ctx = output.getContext('2d')!;
-    ctx.drawImage(canvas, 0, 0);
-    const dataUrl = output.toDataURL('image/jpeg', 0.95);
-    updatePersonalInfo('photo', dataUrl);
+    const ctx = output.getContext('2d');
+    if (!ctx) return;
+
+    // Redraw image into the output canvas without the border indicator
+    ctx.save();
+    if (cropShape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2, 0, Math.PI * 2);
+      ctx.clip();
+    } else if (cropShape === 'rounded') {
+      const r = CANVAS_SIZE * 0.12;
+      ctx.beginPath();
+      ctx.roundRect(4, 4, CANVAS_SIZE - 8, CANVAS_SIZE - 8, r);
+      ctx.clip();
+    } else {
+      ctx.beginPath();
+      ctx.rect(4, 4, CANVAS_SIZE - 8, CANVAS_SIZE - 8);
+      ctx.clip();
+    }
+    ctx.fillStyle = '#f3f4f6';
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.translate(CANVAS_SIZE / 2 + offset.x, CANVAS_SIZE / 2 + offset.y);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.drawImage(img, -img.naturalWidth * zoom / 2, -img.naturalHeight * zoom / 2, img.naturalWidth * zoom, img.naturalHeight * zoom);
+    ctx.restore();
+
+    updatePersonalInfo('photo', output.toDataURL('image/jpeg', 0.95));
+    updateSettings({ photoShape: cropShape });
     onClose();
   };
 
@@ -197,7 +228,6 @@ export const PhotoEditorModal: React.FC<Props> = ({ onClose }) => {
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onMouseLeave={handleMouseUp}
-                  onWheel={handleWheel}
                   style={{ cursor: dragging ? 'grabbing' : 'grab', display: 'block' }}
                 />
                 <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded font-mono pointer-events-none">

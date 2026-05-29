@@ -56,6 +56,8 @@ const VersionCard: React.FC<{
   const [confirmDel, setConfirmDel]     = useState(false);
   const [confirmRestore, setConfirmRestore] = useState(false);
 
+  useEffect(() => { if (!editing) setLabel(v.label); }, [v.label, editing]);
+
   const commitRename = () => {
     const t = label.trim();
     if (t && t !== v.label) onRename(t);

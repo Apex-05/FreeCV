@@ -44,15 +44,11 @@ export const CustomSectionBlock: React.FC<Props> = ({
                 style={{ fontWeight: 700, fontSize: fontSize + 'px' }} />
               {!isPrinting && <DelBtn onClick={() => store.removeCustomSectionEntry(section.id, entry.id)} />}
             </div>
-            {entry.date && (
-              <EditableField value={entry.date} onChange={v => store.updateCustomSectionEntry(section.id, entry.id, 'date', v)}
+            <EditableField value={entry.date} onChange={v => store.updateCustomSectionEntry(section.id, entry.id, 'date', v)}
                 style={{ color: '#6b7280', fontSize: fontSize - 0.5 + 'px', flexShrink: 0 }} />
-            )}
           </div>
-          {entry.subheading && (
-            <EditableField value={entry.subheading} onChange={v => store.updateCustomSectionEntry(section.id, entry.id, 'subheading', v)}
-              style={{ color: accentColor, fontStyle: 'italic', fontSize: fontSize - 0.5 + 'px', display: 'block' }} />
-          )}
+          <EditableField value={entry.subheading} onChange={v => store.updateCustomSectionEntry(section.id, entry.id, 'subheading', v)}
+            style={{ color: accentColor, fontStyle: 'italic', fontSize: fontSize - 0.5 + 'px', display: 'block' }} />
           {entry.bullets.map((b, bi) => (
             <EditableBullet key={bi} value={b} accentColor={accentColor}
               onChange={v => store.updateCustomSectionEntryBullet(section.id, entry.id, bi, v)}

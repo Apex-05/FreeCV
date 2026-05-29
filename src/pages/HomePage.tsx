@@ -444,7 +444,7 @@ function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: 
   const Preview = TEMPLATE_PREVIEWS[config.id];
 
   return (
-    <motion.div whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    <motion.div whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 600, damping: 30 }}
       className="template-card group h-full flex flex-col" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10)' }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       {/* Preview — fixed height */}
       <div className="h-52 bg-white overflow-hidden relative border-b border-gray-100 flex-shrink-0">
@@ -461,11 +461,11 @@ function TemplateCard({ config, onSelect }: { config: TemplateConfig; onSelect: 
           }
         </div>
         {/* Hover overlay */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: hovered ? 1 : 0 }} transition={{ duration: 0.2 }}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: hovered ? 1 : 0 }} transition={{ duration: 0.1 }}
           className="absolute inset-0 flex items-center justify-center"
           style={{ background: config.accentColor + 'CC', backdropFilter: 'blur(4px)' }}>
           <button onClick={onSelect}
-            className="flex items-center gap-2 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-xl text-sm shadow-lg hover:scale-105 transition-transform">
+            className="flex items-center gap-2 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-xl text-sm shadow-lg hover:-translate-y-1 transition-transform">
             Use Template <ArrowRight size={15} />
           </button>
         </motion.div>
@@ -516,6 +516,10 @@ export const HomePage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (importRef.current) importRef.current.value = '';
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Please select a PDF file.');
+      return;
+    }
     if (file.size > 20 * 1024 * 1024) {
       toast.error('File must be under 20 MB.');
       return;
@@ -538,8 +542,8 @@ export const HomePage: React.FC = () => {
           <span className="font-bold text-gray-900 text-lg">FreeCV</span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block">Templates</button>
-          <button onClick={() => featuresRef.current?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block">Features</button>
+          <button onClick={() => templatesRef.current?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block transition-transform hover:-translate-y-0.5">Templates</button>
+          <button onClick={() => featuresRef.current?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block transition-transform hover:-translate-y-0.5">Features</button>
           <button onClick={() => navigate('/editor')} className="btn-primary text-sm py-2 px-4">
             Open Editor <ArrowRight size={14} />
           </button>
@@ -594,7 +598,7 @@ export const HomePage: React.FC = () => {
               <div>
                 <input ref={importRef} type="file" accept=".pdf" onChange={handleImport} style={{ display: 'none' }} />
                 <button onClick={() => importRef.current?.click()}
-                  className="flex items-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base">
+                  className="flex items-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all text-base hover:-translate-y-0.5">
                   <Upload size={16} /> Import My Resume
                 </button>
               </div>
@@ -638,7 +642,7 @@ export const HomePage: React.FC = () => {
           <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
             {categories.map(cat => (
               <button key={cat} onClick={() => setFilter(cat)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all capitalize ${filter === cat ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all capitalize hover:-translate-y-0.5 ${filter === cat ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
                 {cat}
               </button>
             ))}
@@ -654,7 +658,7 @@ export const HomePage: React.FC = () => {
 
           <motion.div initial={{ opacity: 0 }} animate={templatesInView ? { opacity: 1 } : {}} transition={{ delay: 0.4 }}
             className="text-center mt-8">
-            <button onClick={() => navigate('/editor')} className="text-sm text-gray-500 hover:text-indigo-600 transition-colors underline underline-offset-2">
+            <button onClick={() => navigate('/editor')} className="text-sm text-gray-500 hover:text-indigo-600 transition-all underline underline-offset-2 hover:-translate-y-0.5">
               Or continue editing your current resume →
             </button>
           </motion.div>

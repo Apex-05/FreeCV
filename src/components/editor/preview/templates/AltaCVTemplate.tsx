@@ -110,7 +110,7 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                           <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontWeight: 800, fontSize: fs + 1 + 'px', color: '#1a202c' }} />
                           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 1 }}>
                             <EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontWeight: 600, color: acc }} />
-                            {exp.location && <><span style={{ color: '#cbd5e0' }}>·</span><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ color: '#718096', fontSize: fs - 1 + 'px' }} /></>}
+                            {exp.location && <span style={{ color: '#cbd5e0' }}>·</span>}<EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ color: '#718096', fontSize: fs - 1 + 'px' }} />
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -183,7 +183,7 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                       <EditableField value={edu.degree} onChange={v => store.updateEducation(edu.id, 'degree', v)} style={{ fontStyle: 'italic', color: '#4a5568', display: 'block', fontSize: fs - 0.5 + 'px' }} />
                       <div style={{ fontSize: fs - 1.5 + 'px', color: '#a0aec0', display: 'flex', gap: 6 }}>
                         <EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', r.join('').trim()); }} />
-                        {edu.location && <><span>·</span><EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} /></>}
+                        {edu.location && <span>·</span>}<EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} />
                       </div>
                       {edu.gpa && <div style={{ fontSize: fs - 1 + 'px', color: acc }}><EditableField value={`GPA ${edu.gpa}`} onChange={v => store.updateEducation(edu.id, 'gpa', v.replace('GPA ', ''))} /></div>}
                     </div>
@@ -220,8 +220,8 @@ export const AltaCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                         <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600, color: '#1a202c', fontSize: fs - 0.5 + 'px' }} />
                         <Del onClick={() => store.removeCertification(c.id)} />
                       </div>
-                      {c.issuer && <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096', display: 'block' }} />}
-                      {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1.5 + 'px', color: '#a0aec0' }} />}
+                      <EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontSize: fs - 1 + 'px', color: '#718096', display: 'block' }} />
+                      <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1.5 + 'px', color: '#a0aec0' }} />
                     </div>
                   ))}
                   <Add onClick={() => store.addCertification()} label="+ Add certification" />

@@ -43,10 +43,10 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
   };
 
   // Two-column entry row: date hint on left (70px), content on right
-  const Row = ({ date, children }: { date?: string; children: React.ReactNode }) => (
+  const Row = ({ date, children }: { date?: React.ReactNode; children: React.ReactNode }) => (
     <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
-      <div style={{ width: 70, flexShrink: 0, textAlign: 'right', paddingTop: 1 }}>
-        {date && <span style={{ fontSize: fs - 2 + 'px', color: '#718096', fontStyle: 'italic' }}>{date}</span>}
+      <div style={{ width: 70, flexShrink: 0, textAlign: 'right', paddingTop: 1, fontSize: fs - 2 + 'px', color: '#718096', fontStyle: 'italic' }}>
+        {date}
       </div>
       <div style={{ flex: 1 }}>{children}</div>
     </div>
@@ -90,7 +90,7 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
             <div key="education" style={gap}>
               <SH id="education" label="Education" />
               {data.education.map(edu => (
-                <Row key={edu.id} date={dateStr(edu.startDate, edu.endDate)}>
+                <Row key={edu.id} date={<EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', r.join('').trim()); }} />}>
                   <div className="group">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <EditableField value={edu.institution} onChange={v => store.updateEducation(edu.id, 'institution', v)} style={{ fontWeight: 700, color: '#111' }} />
@@ -112,13 +112,13 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
             <div key="experience" style={gap}>
               <SH id="experience" label="Academic Positions" />
               {data.experience.map(exp => (
-                <Row key={exp.id} date={dateStr(exp.startDate, exp.endDate)}>
+                <Row key={exp.id} date={<EditableField value={dateStr(exp.startDate, exp.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateExperience(exp.id, 'startDate', s?.trim() ?? ''); store.updateExperience(exp.id, 'endDate', r.join('').trim()); }} />}>
                   <div className="group">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <div>
                         <EditableField value={exp.title} onChange={v => store.updateExperience(exp.id, 'title', v)} style={{ fontWeight: 700, color: '#111' }} />
-                        {exp.company && <div><EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontStyle: 'italic', color: acc }} /></div>}
-                        {exp.location && <div style={{ fontSize: fs - 1 + 'px', color: '#718096' }}><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>}
+                        <div><EditableField value={exp.company} onChange={v => store.updateExperience(exp.id, 'company', v)} style={{ fontStyle: 'italic', color: acc }} /></div>
+                        <div style={{ fontSize: fs - 1 + 'px', color: '#718096' }}><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} /></div>
                       </div>
                       <Del onClick={() => store.removeExperience(exp.id)} />
                     </div>
@@ -175,11 +175,11 @@ export const AcademicCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
             <div key="certifications" style={gap}>
               <SH id="certifications" label="Grants & Awards" />
               {data.certifications.map(c => (
-                <Row key={c.id} date={c.date}>
+                <Row key={c.id} date={<EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} />}>
                   <div className="group" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <div>
                       <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600, color: '#111' }} />
-                      {c.issuer && <><span style={{ color: '#a0aec0' }}> – </span><EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontStyle: 'italic', color: '#4a5568' }} /></>}
+                      {c.issuer && <span style={{ color: '#a0aec0' }}> – </span>}<EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ fontStyle: 'italic', color: '#4a5568' }} />
                     </div>
                     <Del onClick={() => store.removeCertification(c.id)} />
                   </div>

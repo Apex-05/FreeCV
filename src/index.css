@@ -32,6 +32,13 @@
     outline: 1.5px solid rgba(99,102,241,0.4);
     outline-offset: 1px;
   }
+  /* Show placeholder when the field is not being edited and has no content */
+  .editable-field:not([contenteditable="true"]):empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    font-style: italic;
+  }
 
   .editable-block {
     cursor: text;
@@ -65,7 +72,7 @@
   }
 
   .template-card {
-    @apply relative overflow-hidden rounded-2xl cursor-pointer bg-white transition-all duration-300;
+    @apply relative overflow-hidden rounded-2xl cursor-pointer bg-white transition-all duration-150;
     box-shadow: 0 4px 24px rgba(0,0,0,0.10);
   }
   .template-card:hover {

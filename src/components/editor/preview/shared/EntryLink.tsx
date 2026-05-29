@@ -40,7 +40,10 @@ export const EntryLink: React.FC<EntryLinkProps> = ({ link, onUpdate, isPrinting
           value={val}
           onChange={e => setVal(e.target.value)}
           onBlur={() => { onUpdate(val); setEditing(false); }}
-          onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') { onUpdate(val); setEditing(false); } }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { onUpdate(val); setEditing(false); }
+            if (e.key === 'Escape') { setVal(link); setEditing(false); }
+          }}
           placeholder="https://..."
           style={{ fontSize: size, border: `1px solid ${accentColor}`, borderRadius: 3, padding: '1px 4px', outline: 'none', width: 160, color: '#374151' }}
         />
@@ -54,7 +57,7 @@ export const EntryLink: React.FC<EntryLinkProps> = ({ link, onUpdate, isPrinting
         className="no-print group"
         style={{ display: 'inline-flex', alignItems: 'center', gap: 2, color: accentColor, marginLeft: 4, cursor: 'pointer' }}
         onClick={e => { e.stopPropagation(); openLink(); }}
-        onContextMenu={e => { e.preventDefault(); setEditing(true); }}
+        onContextMenu={e => { e.preventDefault(); setVal(link); setEditing(true); }}
         title={`${link}\nRight-click to edit`}
       >
         <ExternalLink size={size} />
@@ -67,7 +70,7 @@ export const EntryLink: React.FC<EntryLinkProps> = ({ link, onUpdate, isPrinting
   return (
     <button
       className="no-print opacity-0 group-hover:opacity-100 transition-opacity"
-      onClick={e => { e.stopPropagation(); setVal(''); setEditing(true); }}
+      onClick={e => { e.stopPropagation(); setVal(link); setEditing(true); }}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', marginLeft: 4, padding: '0 2px' }}
       title="Add link"
     >

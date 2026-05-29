@@ -74,6 +74,7 @@ function Slider({ label, icon: Icon, value, min, max, step, unit, onLive, onComm
           onChange={e => onLive(parseFloat(e.target.value))}
           onMouseUp={e => onCommit(parseFloat((e.target as HTMLInputElement).value))}
           onTouchEnd={e => onCommit(parseFloat((e.target as HTMLInputElement).value))}
+          onBlur={e => onCommit(parseFloat((e.target as HTMLInputElement).value))}
           style={{ '--pct': percentage + '%' } as React.CSSProperties}
           className="w-full" />
       </div>
@@ -107,7 +108,7 @@ export const SettingsPanel: React.FC = () => {
   const hasSidebar = (['friggeri', 'twentyseconds', 'deedy', 'hipster'] as TemplateId[]).includes(settings.template);
   const colBgDefault = COL_BG_DEFAULTS[settings.template] ?? '#e5e7eb';
   const [liveColBg, setLiveColBg] = useState(settings.columnBgColor || colBgDefault);
-  useEffect(() => { setLiveColBg(settings.columnBgColor || colBgDefault); }, [settings.columnBgColor, settings.template]);
+  useEffect(() => { setLiveColBg(settings.columnBgColor || colBgDefault); }, [settings.columnBgColor, settings.template, settings.accentColor]);
 
   return (
     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="p-4 space-y-6">

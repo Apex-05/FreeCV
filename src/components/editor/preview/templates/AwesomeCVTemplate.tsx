@@ -180,10 +180,10 @@ export const AwesomeCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
                   <div key={c.id} className="group" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600, color: '#1a202c' }} />
-                      {c.issuer && <><span style={{ color: '#718096' }}>·</span><EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} /></>}
+                      {c.issuer && <span style={{ color: '#718096' }}>·</span>}<EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      {c.date && <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#a0aec0', flexShrink: 0 }} />}
+                      <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} style={{ fontSize: fs - 1 + 'px', color: '#a0aec0', flexShrink: 0 }} />
                       <Del onClick={() => store.removeCertification(c.id)} />
                     </div>
                   </div>

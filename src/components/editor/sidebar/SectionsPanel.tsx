@@ -47,7 +47,7 @@ function SortableSection({ section, onToggle, onDelete }: {
         <Icon size={13} className={isCustom ? 'text-purple-400' : 'text-indigo-400'} />
       </div>
       <span className={`flex-1 text-sm font-medium truncate ${section.visible ? 'text-gray-700' : 'text-gray-400 line-through'}`}>
-        {section.label.replace(/<[^>]*>/g, '')}
+        {(() => { const d = document.createElement('div'); d.innerHTML = section.label; return d.textContent || section.label; })()}
       </span>
       <button
         onClick={onToggle}

@@ -88,6 +88,10 @@ export const TopBar: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (importRef.current) importRef.current.value = '';
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Please select a PDF file.');
+      return;
+    }
     if (file.size > 20 * 1024 * 1024) {
       toast.error('File too large. Maximum 20 MB.');
       return;

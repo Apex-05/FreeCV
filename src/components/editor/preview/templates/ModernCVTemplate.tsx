@@ -90,7 +90,7 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
               <div key="experience" style={gap}>
                 <SH id="experience" label="Experience" />
                 {data.experience.map(exp => (
-                  <EntryRow key={exp.id} hint={<><div>{exp.startDate}</div><div>{exp.endDate || 'Present'}</div><div style={{ color: '#718096' }}>{exp.location}</div></>}>
+                  <EntryRow key={exp.id} hint={<><div><EditableField value={exp.startDate} onChange={v => store.updateExperience(exp.id, 'startDate', v)} /></div><div><EditableField value={exp.endDate || 'Present'} onChange={v => store.updateExperience(exp.id, 'endDate', v)} /></div><div><EditableField value={exp.location} onChange={v => store.updateExperience(exp.id, 'location', v)} style={{ color: '#718096' }} /></div></>}>
                     <div className="group">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <span>
@@ -114,12 +114,12 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
               <div key="education" style={gap}>
                 <SH id="education" label="Education" />
                 {data.education.map(edu => (
-                  <EntryRow key={edu.id} hint={dateStr(edu.startDate, edu.endDate)}>
+                  <EntryRow key={edu.id} hint={<EditableField value={dateStr(edu.startDate, edu.endDate)} onChange={v => { const [s, ...r] = v.split(/\s*[–-]\s*/); store.updateEducation(edu.id, 'startDate', s?.trim() ?? ''); store.updateEducation(edu.id, 'endDate', r.join('').trim()); }} />}>
                     <div className="group">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <span>
                           <EditableField value={edu.institution} onChange={v => store.updateEducation(edu.id, 'institution', v)} style={{ fontWeight: 700, color: '#1a202c' }} />
-                          {edu.location && <><span style={{ color: '#a0aec0', margin: '0 4px' }}>·</span><EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} style={{ color: '#718096' }} /></>}
+                          {edu.location && <span style={{ color: '#a0aec0', margin: '0 4px' }}>·</span>}<EditableField value={edu.location} onChange={v => store.updateEducation(edu.id, 'location', v)} style={{ color: '#718096' }} />
                         </span>
                         <Del onClick={() => store.removeEducation(edu.id)} />
                       </div>
@@ -158,7 +158,7 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
               <div key="skills" style={gap}>
                 <SH id="skills" label="Skills" />
                 {data.skills.map(sk => (
-                  <EntryRow key={sk.id} hint={sk.category}>
+                  <EntryRow key={sk.id} hint={<EditableField value={sk.category} onChange={v => store.updateSkillCategory(sk.id, 'category', v)} />}>
                     <div className="group" style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                       <EditableField value={sk.skills} onChange={v => store.updateSkillCategory(sk.id, 'skills', v)} style={{ color: '#4a5568', flex: 1 }} />
                       <Del onClick={() => store.removeSkillCategory(sk.id)} />
@@ -172,11 +172,11 @@ export const ModernCVTemplate: React.FC<Props> = ({ data, isPrinting }) => {
               <div key="certifications" style={gap}>
                 <SH id="certifications" label="Certifications" />
                 {data.certifications.map(c => (
-                  <EntryRow key={c.id} hint={c.date}>
+                  <EntryRow key={c.id} hint={c.date !== undefined ? <EditableField value={c.date} onChange={v => store.updateCertification(c.id, 'date', v)} /> : undefined}>
                     <div className="group" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span>
                         <EditableField value={c.name} onChange={v => store.updateCertification(c.id, 'name', v)} style={{ fontWeight: 600 }} />
-                        {c.issuer && <><span style={{ color: '#a0aec0', margin: '0 4px' }}>·</span><EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} /></>}
+                        {c.issuer && <span style={{ color: '#a0aec0', margin: '0 4px' }}>·</span>}<EditableField value={c.issuer} onChange={v => store.updateCertification(c.id, 'issuer', v)} style={{ color: '#718096' }} />
                       </span>
                       <Del onClick={() => store.removeCertification(c.id)} />
                     </div>

@@ -83,17 +83,22 @@ const EditorPageInner: React.FC = () => {
 
   // ── Global undo/redo keyboard shortcuts ────────────────────────────────────
   const handleUndoRedo = useCallback((e: KeyboardEvent) => {
+    if (!e.ctrlKey) return;
+    const key = e.key.toLowerCase();
+    const isUndo = !e.shiftKey && key === 'z';
+    const isRedo = key === 'y' || (e.shiftKey && key === 'z');
+    if (!isUndo && !isRedo) return;
+
     const target = e.target as HTMLElement;
-    if (target.isContentEditable || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-    if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
-      e.preventDefault();
-      const s = useResumeStore.getState();
-      if (s.history.length > 0) { s.undo(); toast('Undone', { duration: 1000, icon: '✅' }); }
-    } else if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
-      e.preventDefault();
-      const s = useResumeStore.getState();
-      if (s.future.length > 0) { s.redo(); toast('Redone', { duration: 1000, icon: '✅' }); }
-    }
+    // Leave native undo/redo alone inside sidebar inputs
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+    // If a resume field is active, blur it first so its value commits to the store
+    if (target.isContentEditable) target.blur();
+
+    e.preventDefault();
+    const s = useResumeStore.getState();
+    if (isUndo && s.history.length > 0) { s.undo(); toast('Undone', { duration: 1000, icon: '✅' }); }
+    else if (isRedo && s.future.length > 0) { s.redo(); toast('Redone', { duration: 1000, icon: '✅' }); }
   }, []);
 
   useEffect(() => {
