@@ -98,7 +98,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       onEnter?.();
     }
     if (e.key === 'Escape') {
-      if (ref.current) ref.current.innerHTML = value;
+      if (ref.current) ref.current.innerHTML = sanitize(value);
       ref.current?.blur();
     }
   };
@@ -197,7 +197,7 @@ export const EditableBullet: React.FC<BulletProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') { e.preventDefault(); ref.current?.blur(); onAddNext?.(); }
-    if (e.key === 'Escape') { if (ref.current) ref.current.innerHTML = value; ref.current?.blur(); }
+    if (e.key === 'Escape') { if (ref.current) ref.current.innerHTML = sanitize(value); ref.current?.blur(); }
     if (e.key === 'Backspace' && ref.current?.textContent === '') { e.preventDefault(); onRemove(); }
   };
 

@@ -11,7 +11,7 @@ This started as a side project over a semester break and it's stayed one. It wor
 - **10 templates.** Awesome CV, Jake's, Deedy, Twenty Seconds, SB2Nov, Friggeri, Academic, Hipster, ModernCV, AltaCV. Switch anytime; your content carries over.
 - **Click-to-edit preview.** No forms. You edit the resume itself and watch it update.
 - **PDF editor.** Drop in an existing PDF and edit its text in place.
-- **Import.** `.pdf`, `.docx`, `.txt`, or a JSON backup.
+- **Import.** `.pdf`, `.docx`, or `.txt`. Export a JSON backup or a PDF at any time.
 - **Local saves.** Autosave, named snapshots, version history, crash recovery, all in browser storage.
 
 Desktop only for now: the editor asks for a screen wider than 1024px.
