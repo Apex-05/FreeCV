@@ -42,7 +42,7 @@ src/
 
 ## Contributing
 
-FreeCV is taking part in **Hacktoberfest 2026**. Contributions are welcome, but please read [CONTRIBUTING.md](CONTRIBUTING.md) first. It sets out clear rules about which PRs get merged and which get closed.
+FreeCV is taking part in **Hacktoberfest**. Contributions are welcome, but please read [CONTRIBUTING.md](CONTRIBUTING.md) first. It sets out clear rules about which PRs get merged and which get closed.
 
 ## License
 
