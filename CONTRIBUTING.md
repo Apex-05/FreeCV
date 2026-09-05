@@ -4,6 +4,8 @@ Thanks for looking. FreeCV is a side project, so the bar for a PR is simple: **d
 
 Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+Found a security problem? Don't open an issue. See [SECURITY.md](SECURITY.md) instead.
+
 ## What gets merged
 
 Anything that adds or improves real behaviour:
