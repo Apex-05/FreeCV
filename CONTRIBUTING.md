@@ -45,16 +45,18 @@ If you can't explain in the PR description what your change does, it isn't ready
 
 ## Branches
 
-Two long-lived branches, both protected:
+FreeCV uses two long-lived branches:
 
-| Branch | What it is | Can you PR to it? |
+| Branch | Purpose | Contributor PRs |
 |---|---|---|
-| `dev` | Where everything lands first. The default branch, so your PR targets it automatically. | **Yes, target this one.** |
-| `main` | Release branch. Only ever updated by a `dev` → `main` PR that I merge. | No. |
+| `dev` | Development branch where accepted contributions land first. | Yes |
+| `main` | Stable release branch. Updated from `dev` through a PR. | No |
 
-Neither branch can be force-pushed or deleted, and neither accepts a push from outside the repo. Your work reaches `dev` through a PR, and `dev` reaches `main` through a PR.
+Contributors should open pull requests against `dev`, not `main`.
 
-If you open a PR against `main`, I'll ask you to retarget it at `dev`. GitHub lets you change the base branch on an open PR (**Edit** next to the title), so you won't lose your work or your review comments.
+The `main` branch is protected and cannot be updated directly. Changes reach `main` through a reviewed `dev` → `main` pull request.
+
+If you accidentally open a PR against `main`, please retarget it to `dev`.
 
 ## Sending a PR
 
