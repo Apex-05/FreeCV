@@ -44,6 +44,13 @@ src/
 
 FreeCV is taking part in **Hacktoberfest 2026**. Contributions are welcome, but please read [CONTRIBUTING.md](CONTRIBUTING.md) first. It sets out clear rules about which PRs get merged and which get closed.
 
+## License
+
+[GPL-3.0](LICENSE). You can use, modify, and share this freely. If you distribute a
+modified version, it has to stay open source under the same license.
+
+Resumes you build with FreeCV are yours. The license covers this code, not your data.
+
 ---
 
 Built by [Adarsh Ranjan](https://github.com/Apex-05). Free forever.

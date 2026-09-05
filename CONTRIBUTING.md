@@ -2,6 +2,8 @@
 
 Thanks for looking. FreeCV is a side project, so the bar for a PR is simple: **does it make the app do something better?**
 
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## What gets merged
 
 Anything that adds or improves real behaviour:
@@ -72,6 +74,11 @@ Then:
 4. Say what it does and how you tested it.
 
 Screenshots help a lot for anything visual.
+
+## Licensing
+
+FreeCV is [GPL-3.0](LICENSE). By opening a pull request you agree your contribution
+is licensed under the same terms. Nothing to sign, no CLA.
 
 ## Questions
 
