@@ -414,7 +414,9 @@ export const PDFEditorPage: React.FC = () => {
     try {
       setLoadingProgress('Loading PDF.js…');
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+      // Resolve the worker from node_modules so it can never drift from the API version
+      const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
       const arrayBuffer = await file.arrayBuffer();
       setLoadingProgress('Parsing document…');

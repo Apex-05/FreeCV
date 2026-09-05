@@ -130,7 +130,9 @@ export async function parsePdf(file: File): Promise<ParseResult> {
   if (file.size === 0) throw new Error('The PDF file is empty.');
 
   const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  // Resolve the worker from node_modules so it can never drift from the API version
+  const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
   const arrayBuffer = await file.arrayBuffer();
 
